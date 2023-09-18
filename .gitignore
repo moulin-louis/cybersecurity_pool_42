@@ -54,4 +54,6 @@ dkms.conf
 
 #other
 */*/.idea
+*/.idea
+./.idea
 */*/.vscode
