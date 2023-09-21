@@ -1,0 +1,8 @@
+services:
+  ft_onion:
+    image: ft_onion
+    container_name: ft_onion
+    build: ./
+    ports:
+      - "8787:80"
+      - "4243:4242"
