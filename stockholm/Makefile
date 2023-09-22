@@ -1,6 +1,6 @@
 all:
-	docker build -t stockholm .
-	docker run stockholm
+	@docker build -t stockholm .
+	@docker run --env-file .env stockholm
 
 clean:
 	@./clean.sh
