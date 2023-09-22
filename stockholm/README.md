@@ -16,7 +16,7 @@ The Inception Encryption Tool is a command-line program written in TypeScript th
 
 ```bash
 # To run the program
-$ bun build --compile ./index.ts --outfile=stockholm  [OPTIONS]
+$ bun build --compile ./index.ts --outfile=stockholm
 $ ./stockholm [OPTIONS]
 ```
 
