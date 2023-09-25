@@ -1,5 +1,7 @@
-while (True):
-    f = open("./big_file2")
-    for line in f.readline():
-        print(len(line))
-    f.close()
+chunk_size = 1024
+with open("/dev/random") as f:
+    while True:
+        chunk = f.read(chunk_size)
+        if not chunk:
+            break
+        del chunk
