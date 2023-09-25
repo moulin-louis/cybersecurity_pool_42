@@ -6,19 +6,17 @@ def read_dev_zero_in_chunks(chunk_size=1024*1024, limit=1024*1024*10*10):
     while total_read < limit:
         chunk = f.read(chunk_size)
         total_read += len(chunk)
-        # Simulate processing, or simply discard the chunk to abuse disk reads
         del chunk
 
-def spawn_readers(num_threads=5, chunk_size=1024*1024, limit=1024*1024*10):
-    threads = []
-    while True:
-        for _ in range(num_threads):
-            t = threading.Thread(target=read_dev_zero_in_chunks, args=(chunk_size, limit))
-            t.start()
-            threads.append(t)
-        for t in threads:
-            t.join()
-            print('10 MB read')
+def spawn_readers(num_processes=5, filename='bigfile', chunk_size=1024*1024, limit=1024*1024*10):
+    processes = []
+    for _ in range(num_processes):
+        p = multiprocessing.Process(target=read_large_file_in_chunks, args=(filename, chunk_size, limit))
+        p.start()
+        processes.append(p)
 
+    for p in processes:
+        p.join()
 
-spawn_readers(num_threads=10)
+while True:
+    spawn_readers(num_threads=10)
