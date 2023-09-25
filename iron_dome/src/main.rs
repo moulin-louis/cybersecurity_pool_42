@@ -83,8 +83,11 @@ fn main() {
     }
     println!("Starting monitoring");
     loop {
+        println!("Detection entropy");
         detect_entropy_change(&mut watcher);
+        println!("Detection read_abuse");
         detect_disk_read_abuse(&mut watcher);
+        println!("Detection crypto_activity");
         detect_crypto_activity(&mut watcher);
         std::io::stdout().flush().unwrap();
         thread::sleep(TTS);
