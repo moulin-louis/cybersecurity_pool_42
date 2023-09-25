@@ -13,6 +13,7 @@ use std::{
     time::Duration,
     path::PathBuf,
 };
+use std::io::Write;
 use daemonize::Daemonize;
 use sysinfo::{System, SystemExt};
 
@@ -85,6 +86,7 @@ fn main() {
         detect_entropy_change(&mut watcher);
         detect_disk_read_abuse(&mut watcher);
         detect_crypto_activity(&mut watcher);
+        std::io::stdout().flush().unwrap();
         thread::sleep(TTS);
     }
 }

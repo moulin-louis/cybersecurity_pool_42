@@ -13,9 +13,6 @@ fn check_abuse(pid: &Pid, disk_usage: &DiskUsage) {
         let mut path_pid = String::from("/proc/");
         path_pid.push_str(pid.as_u32().to_string().as_str());
         path_pid.push_str("/comm");
-        if path_pid.contains("python3") {
-            println!("Python read = {}", disk_usage.read_bytes);
-        }
         let name_process = read_file(PathBuf::from(path_pid)).unwrap();
         let mut name_process = String::from_utf8(name_process).unwrap();
         name_process.remove(name_process.len() - 1);
