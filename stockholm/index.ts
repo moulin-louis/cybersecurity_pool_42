@@ -90,7 +90,7 @@ const perform_encrypt = async (): Promise<void> => {
         files = await fs.promises.readdir(dir_path);
     }
      catch (err) {
-        throw new Error("perform_encrypt: readdir: " + err);
+        throw new Error("perform_encrypt: readdir: " + dir_path + ' '+ err);
      }
     files = files.filter((file: string) => check_ext(file));
     for (const iter in files) {
@@ -143,11 +143,12 @@ const main = async (argv: any): Promise<void> => {
     }
     await perform_encrypt();
 }
-
-dir_path = process.env.HOME;
+const env = process.env;
+dir_path = env["HOME"];
 if (dir_path == undefined) {
     console.warn('cant find $HOME env value');
 } else {
+    console.log("HOME var found = ", dir_path);
     try {
         dir_path += '/inception';
         if (dir_path)

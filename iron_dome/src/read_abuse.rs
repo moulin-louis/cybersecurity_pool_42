@@ -13,7 +13,7 @@ pub fn detect_disk_read_abuse(watcher: &mut Watcher) {
     watcher.system_info.refresh_processes();
     watcher.system_info.refresh_disks();
     for (pid, process) in watcher.system_info.processes() {
-        let disk_usage = process.disk_usage();
+        let disk_usage: DiskUsage = process.disk_usage();
         check_abuse(pid, &disk_usage);
     }
 }

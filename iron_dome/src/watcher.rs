@@ -29,7 +29,7 @@ impl Default for Watcher {
 
 impl Watcher {
     pub fn update_entropy(&mut self, val: &PathBuf) {
-        let content = match read_file(val.clone()) {
+        let content: Vec<u8> = match read_file(val.clone()) {
             Ok(result) => result,
             Err(err) => {
                 match err {

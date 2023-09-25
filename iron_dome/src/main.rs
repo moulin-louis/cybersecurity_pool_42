@@ -14,6 +14,7 @@ use std::{
     path::PathBuf,
 };
 use daemonize::Daemonize;
+use sysinfo::{System, SystemExt};
 
 const LOG_DIR: &str = " /var/log/irondome/irondome.log";
 const LOG_DIR_ERR: &str = " /var/log/irondome/irondome_err.log";
@@ -33,15 +34,15 @@ pub fn read_file(path: PathBuf) -> Result<Vec<u8>, i32> {
 }
 
 fn init_daemon() -> Option<()> {
-    let log_file = match File::create(LOG_DIR) {
+    let log_file: File = match File::create(LOG_DIR) {
         Ok(val) => val,
         Err(_) => return None,
     };
-    let log_file_err = match File::create(LOG_DIR_ERR){
+    let log_file_err: File = match File::create(LOG_DIR_ERR){
         Ok(val) => val,
         Err(_) => return None,
     };
-    let daemonize = Daemonize::new()
+    let daemonize: Daemonize<()> = Daemonize::new()
         .pid_file("/tmp/test.pid")
         .working_directory("/tmp")
         .stderr(log_file_err)
@@ -58,10 +59,17 @@ fn init_daemon() -> Option<()> {
 }
 
 fn main() {
+    if System::IS_SUPPORTED {
+        println!("SystemExt is supported");
+    } else {
+        println!("{}", "SystemExt is not supported".to_ascii_uppercase());
+        return;
+    }
     let mut daemon_mode: bool = true;
-    let mut watcher = Watcher::default();
+    let mut watcher: Watcher = Watcher::default();
+    watcher.system_info.refresh_cpu();
     if watcher.path_to_watch.contains(&"--no-daemon".to_string()) {
-        let index = watcher.path_to_watch.iter().position(|x| x == "--no-daemon").unwrap();
+        let index: usize = watcher.path_to_watch.iter().position(|x| x == "--no-daemon").unwrap();
         watcher.path_to_watch.remove(index);
         daemon_mode = false;
     }
@@ -79,5 +87,4 @@ fn main() {
         detect_crypto_activity(&mut watcher);
         thread::sleep(TTS);
     }
-    eprintln!("Somehow we are here, not suppose to happen, weird");
 }
