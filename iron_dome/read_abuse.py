@@ -19,4 +19,4 @@ def spawn_readers(num_processes=5, filename='bigfile', chunk_size=1024*1024, lim
         p.join()
 
 while True:
-    spawn_readers(num_threads=10)
+    spawn_readers(num_processes=10)
