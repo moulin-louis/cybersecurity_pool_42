@@ -28,12 +28,12 @@ impl Default for Watcher {
 }
 
 impl Watcher {
-    pub fn update_entropy(&mut self, val: &PathBuf) {
+    pub fn update_entropy(&mut self, val: &PathBuf) -> Option<()> {
         let content: Vec<u8> = match read_file(val.clone()) {
             Ok(result) => result,
             Err(err) => {
-                match err {
-                    1 => return,
+                return match err {
+                    1 => None,
                     2 => {
                         //removing val to file_to_watch
                         self.files_to_watch.remove(
@@ -42,8 +42,9 @@ impl Watcher {
                                 .position(|r| r == val)
                                 .unwrap()
                         );
-                        return; },
-                    _ => return,
+                        None
+                    },
+                    _ => None,
                 };
             },
         };
@@ -55,5 +56,6 @@ impl Watcher {
         } else {
             self.file_watched.insert(val.clone(), new_entropy);
         }
+        Some(())
     }
 }

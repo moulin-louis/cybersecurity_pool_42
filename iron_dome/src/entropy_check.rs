@@ -36,7 +36,10 @@ fn updating_files_to_watch(watcher: &mut Watcher) {
 
 fn update_entropy_file_to_watch(watcher: &mut Watcher) {
     for index in 0..watcher.files_to_watch.len() {
-        watcher.update_entropy(&(watcher.files_to_watch[index]).clone());
+        if watcher.update_entropy(&watcher.files_to_watch[index].clone()).is_none() {
+            eprintln!("files_to_watch change, aborting current loop");
+            break;
+        }
     }
 }
 
