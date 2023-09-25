@@ -11,7 +11,8 @@ fn check_abuse(pid: &Pid, disk_usage: &DiskUsage) {
         path_pid.push_str(pid.as_u32().to_string().as_str());
         path_pid.push_str("/comm");
         let name_process = read_file(PathBuf::from(path_pid)).unwrap();
-        println!("Potential read abuse : [{}]:[{}] -> {} bytes read",pid, String::from_utf8(name_process).unwrap(),disk_usage.read_bytes);
+        let name_process = String::from_utf8(name_process.clone()).unwrap().remove(name_process.len() - 1);
+        println!("Potential read abuse : [{}]:[{}] -> {} bytes read",pid, name_process,disk_usage.read_bytes);
     }
 }
 
