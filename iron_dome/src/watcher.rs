@@ -51,6 +51,7 @@ fn get_entropy(path: &Path) -> Option<f32> {
         if byte_read == 0{
             break;
         }
+        println!("Byte read this loop = {}", byte_read);
         total_read += byte_read;
         result += shannon_entropy(&buff[0..byte_read]);
         nbr_loop += 1;
