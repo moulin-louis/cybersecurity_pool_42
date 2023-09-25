@@ -29,6 +29,7 @@ impl Default for Watcher {
 
 fn get_entropy(path: &Path) -> Option<f32> {
     let mut result: f32 = 0.0;
+    println!("reading content of {}", path.to_str().unwrap());
     let mut f: File = match File::open(path) {
         Ok(val) => val,
         Err(err) => {
