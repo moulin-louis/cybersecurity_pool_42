@@ -3,7 +3,7 @@ use crate::watcher::Watcher;
 use sysinfo::{ProcessExt, SystemExt, DiskUsage, Pid, PidExt};
 use crate::read_file;
 
-const THRESHOLD_READ: u64 = 1000000;
+const THRESHOLD_READ: u64 = 100000000; //100MB
 
 fn check_abuse(pid: &Pid, disk_usage: &DiskUsage) {
     if std::process::id() == pid .as_u32(){

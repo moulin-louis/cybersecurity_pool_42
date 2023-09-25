@@ -60,10 +60,8 @@ fn init_daemon() -> Option<()> {
 }
 
 fn main() {
-    if System::IS_SUPPORTED {
-        println!("SystemExt is supported");
-    } else {
-        println!("{}", "SystemExt is not supported".to_ascii_uppercase());
+    if !System::IS_SUPPORTED {
+        eprintln!("{}", "SystemExt is not supported".to_ascii_uppercase());
         return;
     }
     let mut daemon_mode: bool = true;
@@ -81,13 +79,9 @@ fn main() {
         println!("No path provided, default to $HOME");
         watcher.path_to_watch.push(env::var("HOME").expect("Cant find HOME env var"));
     }
-    println!("Starting monitoring");
     loop {
-        println!("Detection entropy");
         detect_entropy_change(&mut watcher);
-        println!("Detection read_abuse");
         detect_disk_read_abuse(&mut watcher);
-        println!("Detection crypto_activity");
         detect_crypto_activity(&mut watcher);
         std::io::stdout().flush().unwrap();
         thread::sleep(TTS);
