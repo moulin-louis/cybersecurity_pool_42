@@ -1,4 +1,3 @@
-use std::time::UNIX_EPOCH;
 use crate::{watcher::Watcher};
 use sysinfo::{CpuExt, SystemExt};
 
