@@ -25,8 +25,9 @@ fn updating_files_to_watch(watcher: &mut Watcher) {
                     if val.file_type().unwrap().is_dir() {
                         continue;
                     }
-                    if !watcher.files_to_watch.contains(&val.path()) {
-                        watcher.files_to_watch.push(val.path());
+                    let tmp = val.path();
+                    if !watcher.file_watched.contains_key(&tmp) {
+                        watcher.file_watched.insert(tmp, 0.0);
                     }
                 }
             }
@@ -35,8 +36,8 @@ fn updating_files_to_watch(watcher: &mut Watcher) {
 }
 
 fn update_entropy_file_to_watch(watcher: &mut Watcher) {
-    for index in 0..watcher.files_to_watch.len() {
-        if watcher.update_entropy(&watcher.files_to_watch[index].clone()).is_none() {
+    for pair in watcher.file_watched.clone() {
+        if watcher.update_entropy(&pair.0).is_none() {
             eprintln!("files_to_watch change, aborting current loop");
             break;
         }

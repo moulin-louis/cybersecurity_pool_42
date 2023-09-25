@@ -7,7 +7,6 @@ use sysinfo::{System, SystemExt};
 #[derive(Debug)]
 pub struct Watcher {
     pub path_to_watch: Vec<String>,
-    pub files_to_watch: Vec<PathBuf>,
     pub file_watched: HashMap<PathBuf, f32>,
     pub system_info: System,
 }
@@ -16,7 +15,6 @@ impl Default for Watcher {
     fn default() -> Self {
         Watcher {
             file_watched: HashMap::new(),
-            files_to_watch: Vec::new(),
             system_info: System::new(),
             path_to_watch: {
                 let mut tmp: Vec<String> = env::args().collect();
@@ -35,13 +33,7 @@ impl Watcher {
                 return match err {
                     1 => None,
                     2 => {
-                        //removing val to file_to_watch
-                        self.files_to_watch.remove(
-                            self.files_to_watch
-                                .iter()
-                                .position(|r| r == val)
-                                .unwrap()
-                        );
+                        self.file_watched.remove(val);
                         None
                     },
                     _ => None,
