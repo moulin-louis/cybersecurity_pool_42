@@ -80,8 +80,11 @@ fn main() {
         watcher.path_to_watch.push(env::var("HOME").expect("Cant find HOME env var"));
     }
     loop {
+        println!("start entropy check");
         detect_entropy_change(&mut watcher);
+        println!("start read_abuse check");
         detect_disk_read_abuse(&mut watcher);
+        println!("start crypto_activity check");
         detect_crypto_activity(&mut watcher);
         std::io::stdout().flush().unwrap();
         thread::sleep(TTS);
