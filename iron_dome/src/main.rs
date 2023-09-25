@@ -9,9 +9,8 @@ use crypto_activity::detect_crypto_activity;
 use std::{
     env,
     thread,
-    fs::{File, read},
+    fs::File,
     time::Duration,
-    path::PathBuf,
 };
 use std::io::Write;
 use daemonize::Daemonize;
@@ -21,18 +20,6 @@ const LOG_DIR: &str = " /var/log/irondome/irondome.log";
 const LOG_DIR_ERR: &str = " /var/log/irondome/irondome_err.log";
 const TTS:Duration = Duration::from_secs(2);
 
-pub fn read_file(path: PathBuf) -> Result<Vec<u8>, i32> {
-    match read(&path) {
-        Ok(val) => Ok(val),
-        Err(err) => {
-            if err.raw_os_error().unwrap() == 2 {
-                return Err(2);
-            }
-            eprintln!("Error reading {:?} : {}" ,path, err);
-            Err(1)
-        }
-    }
-}
 
 fn init_daemon() -> Option<()> {
     let log_file: File = match File::create(LOG_DIR) {
@@ -80,11 +67,8 @@ fn main() {
         watcher.path_to_watch.push(env::var("HOME").expect("Cant find HOME env var"));
     }
     loop {
-        println!("start entropy check");
         detect_entropy_change(&mut watcher);
-        println!("start read_abuse check");
         detect_disk_read_abuse(&mut watcher);
-        println!("start crypto_activity check");
         detect_crypto_activity(&mut watcher);
         std::io::stdout().flush().unwrap();
         thread::sleep(TTS);

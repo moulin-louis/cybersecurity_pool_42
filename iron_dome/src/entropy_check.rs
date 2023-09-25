@@ -7,17 +7,18 @@ fn updating_files_to_watch(watcher: &mut Watcher) {
     //iter over all path to watch
     for index in 0..watcher.path_to_watch.len() {
         //list all files and dir into this path
-        let list_files: ReadDir = match read_dir(&watcher.path_to_watch[index]) {
+        let path = &watcher.path_to_watch[index];
+        let list_files: ReadDir = match read_dir(path) {
             Ok(value) => value,
             Err(err) => {
-                eprintln!("Error reading files of {}: {err}", watcher.path_to_watch[index]);
-                to_delete.push(watcher.path_to_watch[index].clone());
+                eprintln!("Error reading files of {}: {}", path, err);
+                to_delete.push(path.clone());
                 continue;
             },
         };
         //add every file (not dir) into file_watched
-        for path in list_files {
-            match path {
+        for dir_entry in list_files {
+            match dir_entry {
                 Err(err) => {
                     eprintln!("Error read path: {}", err);
                 },

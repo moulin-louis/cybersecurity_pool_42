@@ -1,22 +1,34 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, process};
+use std::fs::read;
 use crate::watcher::Watcher;
 use sysinfo::{ProcessExt, SystemExt, DiskUsage, Pid, PidExt};
-use crate::read_file;
+
+fn read_file(path: PathBuf) -> Result<Vec<u8>, i32> {
+    match read(&path) {
+        Ok(val) => Ok(val),
+        Err(err) => {
+            if err.raw_os_error().unwrap() == 2 {
+                return Err(2);
+            }
+            eprintln!("Error reading {:?} : {}" ,path, err);
+            Err(1)
+        }
+    }
+}
 
 const THRESHOLD_READ: u64 = 100000000; //100MB
-
 fn check_abuse(pid: &Pid, disk_usage: &DiskUsage) {
-    if std::process::id() == pid .as_u32(){
+    let pid_nbr = pid.as_u32();
+    if process::id() == pid_nbr{
         return;
     }
     if disk_usage.read_bytes > THRESHOLD_READ {
-        let mut path_pid = String::from("/proc/");
-        path_pid.push_str(pid.as_u32().to_string().as_str());
+        let mut path_pid: String = String::from("/proc/");
+        path_pid.push_str(pid_nbr.to_string().as_str());
         path_pid.push_str("/comm");
-        let name_process = read_file(PathBuf::from(path_pid)).unwrap();
-        let mut name_process = String::from_utf8(name_process).unwrap();
+        let mut name_process: String = String::from_utf8(read_file(PathBuf::from(path_pid)).unwrap()).unwrap();
         name_process.remove(name_process.len() - 1);
-        println!("Potential read abuse : [{}]:[{}] -> {} bytes read",pid, name_process,disk_usage.read_bytes);
+        println!("Potential read abuse : [{}]:[{}] -> {} bytes read",pid, name_process, disk_usage.read_bytes);
     }
 }
 

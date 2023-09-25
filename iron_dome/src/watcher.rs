@@ -29,7 +29,6 @@ impl Default for Watcher {
 
 fn get_entropy(path: &Path) -> Option<f32> {
     let mut result: f32 = 0.0;
-    println!("reading content of {}", path.to_str().unwrap());
     let mut f: File = match File::open(path) {
         Ok(val) => val,
         Err(err) => {
@@ -37,11 +36,10 @@ fn get_entropy(path: &Path) -> Option<f32> {
             return None;
         }
     };
-    let mut total_read = 0;
     let mut nbr_loop: i32 = 0;
     loop {
         let mut buff: [u8; BUFF_SIZE] = [0; BUFF_SIZE];
-        let byte_read = match f.read(&mut buff) {
+        let byte_read: usize = match f.read(&mut buff) {
             Ok(val) => val,
             Err(err) => {
                 println!("Error reading file: {}", err);
@@ -51,21 +49,15 @@ fn get_entropy(path: &Path) -> Option<f32> {
         if byte_read == 0{
             break;
         }
-        println!("Byte read this loop = {}", byte_read);
-        total_read += byte_read;
         result += shannon_entropy(&buff[0..byte_read]);
         nbr_loop += 1;
     }
-    println!("Total byte read = {}", total_read);
     result /= nbr_loop as f32;
     Some(result)
 }
 
 fn handle_entropy_change(old_entro: f32, new_entro: f32, val: &PathBuf) {
-    if old_entro == 0.0 {
-        return;
-    }
-    if (new_entro - old_entro).abs() > 1.0 {
+    if old_entro != 0.0 && (new_entro - old_entro).abs() > 1.0 {
         println!("Potential encryption of file: {:?}", val);
     }
 }
