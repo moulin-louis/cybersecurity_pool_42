@@ -1,6 +1,6 @@
 import threading
 
-def read_dev_zero_in_chunks(chunk_size=1024*1024, limit=1024*1024*10*10:  
+def read_dev_zero_in_chunks(chunk_size=1024*1024, limit=1024*1024*10*10):
     total_read = 0
     f = open('./bigfile', 'rb')
     while total_read < limit:
