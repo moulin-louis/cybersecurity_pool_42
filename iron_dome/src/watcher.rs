@@ -37,6 +37,7 @@ fn get_entropy(path: &Path) -> Option<f32> {
             return None;
         }
     };
+    let mut total_read = 0;
     let mut nbr_loop: i32 = 0;
     loop {
         let mut buff: [u8; BUFF_SIZE] = [0; BUFF_SIZE];
@@ -50,9 +51,11 @@ fn get_entropy(path: &Path) -> Option<f32> {
         if byte_read == 0{
             break;
         }
+        total_read += byte_read;
         result += shannon_entropy(&buff[0..byte_read]);
         nbr_loop += 1;
     }
+    println!("Total byte read = {}", total_read);
     result /= nbr_loop as f32;
     Some(result)
 }
