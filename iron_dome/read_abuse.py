@@ -1,6 +1,6 @@
 import multiprocessing
 
-def read_dev_zero_in_chunks(chunk_size=1024*1024, limit=1024*1024*10*10):
+def read_large_file_in_chunks(filename, chunk_size=1024*1024, limit=1024*1024*10):  # Default limit is 10MB
     total_read = 0
     f = open('./bigfile', 'rb')
     while total_read < limit:
