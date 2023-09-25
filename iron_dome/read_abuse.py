@@ -2,7 +2,7 @@ import threading
 
 def read_dev_zero_in_chunks(chunk_size=1024*1024, limit=1024*1024*10):  # Default limit is 10MB
     total_read = 0
-    f = open('/dev/zero', 'rb')
+    f = open('./bigfile', 'rb')
     while total_read < limit:
         chunk = f.read(chunk_size)
         total_read += len(chunk)
