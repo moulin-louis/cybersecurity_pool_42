@@ -61,8 +61,10 @@ pub fn detect_disk_read_abuse(watcher: &mut Watcher) {
             mb_read: fields[5].parse::<f64>().unwrap() / 2048.0,
             mb_wrtn: fields[9].parse::<f64>().unwrap() / 2048.0,
         };
-        println!("mb read for disk: {}", ds.mb_read);
-        println!("mb write for disk: {}", ds.mb_wrtn);
+        if !fields[3].contains("loop") {
+            println!("mb read for disk: {}", ds.mb_read);
+            println!("mb write for disk: {}", ds.mb_wrtn);
+        }
         if watcher.disk_read.contains_key(fields[2]) {
             curr.insert(fields[2].to_owned(), ds);
         }
