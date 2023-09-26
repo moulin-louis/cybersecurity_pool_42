@@ -81,7 +81,7 @@ fn main() {
         println!("- Check crypto");
         detect_crypto_activity(&mut watcher);
         println!("- Check disk_read");
-        // detect_disk_read_abuse(&mut watcher);
+        detect_disk_read_abuse(&mut watcher);
         std::io::stdout().flush().unwrap();
         thread::sleep(TTS);
     };
