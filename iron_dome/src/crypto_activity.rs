@@ -8,7 +8,6 @@ pub fn detect_crypto_activity(watcher: &mut Watcher) {
         avrg_load += cpu.cpu_usage() as u32;
     }
     avrg_load /= watcher.system_info.cpus().len() as u32;
-    println!("Avrg loaf is {}", avrg_load);
     if avrg_load > 90 {
         println!("Intense cpu activiy detected: {}%!", avrg_load);
     }

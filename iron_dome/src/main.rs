@@ -77,11 +77,11 @@ fn main() {
     }
     while running.load(SeqCst) {
         watcher.system_info.refresh_all();
-        println!("- Check entropy");
+        // println!("- Check entropy");
         detect_entropy_change(&mut watcher);
-        println!("- Check crypto");
+        // println!("- Check crypto");
         detect_crypto_activity(&mut watcher);
-        println!("- Check disk_read");
+        // println!("- Check disk_read");
         detect_disk_read_abuse(&mut watcher);
         std::io::stdout().flush().unwrap();
         thread::sleep(TTS);
