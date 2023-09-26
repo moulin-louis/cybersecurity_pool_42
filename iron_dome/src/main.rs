@@ -2,10 +2,12 @@ use std::{
     env,
     thread,
     fs::File,
-    io::Write,
     time::Duration,
     sync::{Arc, atomic::{AtomicBool, Ordering::SeqCst}},
 };
+use std::collections::HashMap;
+use std::thread::JoinHandle;
+
 mod watcher;
 use watcher::Watcher;
 mod entropy_check;
@@ -26,11 +28,17 @@ const TTS:Duration = Duration::from_secs(2);
 fn init_daemon() -> Option<()> {
     let log_file: File = match File::create(LOG_DIR) {
         Ok(val) => val,
-        Err(_) => return None,
+        Err(_) => {
+            eprintln!("Impossible to create: {}", LOG_DIR);
+            return None;
+        },
     };
     let log_file_err: File = match File::create(LOG_DIR_ERR){
         Ok(val) => val,
-        Err(_) => return None,
+        Err(_) => {
+            eprintln!("Impossible to create: {}", LOG_DIR_ERR);
+            return None;
+        },
     };
     let daemonize: Daemonize<()> = Daemonize::new()
         .pid_file("/tmp/test.pid")
@@ -47,36 +55,69 @@ fn init_daemon() -> Option<()> {
 }
 
 fn main() {
-    let running: Arc<AtomicBool> = Arc::new(AtomicBool::new(true));
-    let r: Arc<AtomicBool> = running.clone();
-    set_handler(move || {
-        println!("Ctrl-c received");
-        r.store(false, SeqCst); }).unwrap();
     if !System::IS_SUPPORTED {
         eprintln!("{}", "SystemExt is not supported".to_ascii_uppercase());
         return;
     }
     let mut daemon_mode: bool = true;
-    let mut watcher: Watcher = Watcher::default();
-    watcher.system_info.refresh_all();
-    if watcher.path_to_watch.contains(&"--no-daemon".to_string()) {
-        let index: usize = watcher.path_to_watch.iter().position(|x| x == "--no-daemon").unwrap();
-        watcher.path_to_watch.remove(index);
+    if env::args().any(|x| x == "--no-daemon") {
+        println!("Running in foreground mode");
         daemon_mode = false;
     }
     if daemon_mode && init_daemon().is_none() {
         return;
     }
-    if watcher.path_to_watch.is_empty() {
-        println!("No path provided, default to $HOME");
-        watcher.path_to_watch.push(env::var("HOME").expect("Cant find HOME env var"));
-    }
-    while running.load(SeqCst) {
-        watcher.system_info.refresh_all();
-        detect_entropy_change(&mut watcher);
-        detect_crypto_activity(&mut watcher);
-        detect_disk_read_abuse(&mut watcher);
-        std::io::stdout().flush().unwrap();
-        thread::sleep(TTS);
-    };
+    let running: Arc<AtomicBool> = Arc::new(AtomicBool::new(true));
+    let r: Arc<AtomicBool> = running.clone();
+    set_handler(move || {
+        println!("Ctrl-c received");
+        r.store(false, SeqCst); }).unwrap();
+
+    let thread_entro: JoinHandle<()> = thread::spawn({
+        let running = running.clone();
+        move || {
+            let mut watcher = Watcher::default();
+            if watcher.path_to_watch.is_empty() {
+                println!("No path provided, default to $HOME");
+                println!("Next time we advise you to provide path with your important file");
+                watcher.path_to_watch.push(env::var("HOME").expect("Cant find HOME env key"));
+            }
+            if !daemon_mode {
+                let index: usize = watcher.path_to_watch.iter().position(|x| x == "--no-daemon").unwrap();
+                watcher.path_to_watch.remove(index);
+            }
+            while running.load(SeqCst) {
+                detect_entropy_change(&mut watcher);
+                thread::sleep(TTS);
+            }
+        }
+    });
+
+    let thread_crypto: JoinHandle<()> = thread::spawn({
+        let running = running.clone();
+        move || {
+            let mut system_info: System = System::new();
+            system_info.refresh_all();
+            while running.load(SeqCst) {
+                detect_crypto_activity(&mut system_info);
+                thread::sleep(TTS);
+            }
+        }
+    });
+
+    let thread_disk: JoinHandle<()> = thread::spawn({
+        let running = running;
+        move || {
+            let mut disk_info: HashMap<String, u64> = HashMap::new();
+            while running.load(SeqCst) {
+                detect_disk_read_abuse(&mut disk_info);
+                thread::sleep(TTS);
+            }
+        }
+    });
+
+    thread_entro.join().unwrap();
+    thread_crypto.join().unwrap();
+    thread_disk.join().unwrap();
+
 }
