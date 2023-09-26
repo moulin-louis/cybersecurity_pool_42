@@ -62,7 +62,7 @@ fn main() {
     }
     let mut daemon_mode: bool = true;
     let mut watcher: Watcher = Watcher::default();
-    watcher.system_info.refresh_disks();
+    watcher.system_info.refresh_all();
     watcher.system_info.refresh_disks();
     if watcher.path_to_watch.contains(&"--no-daemon".to_string()) {
         let index: usize = watcher.path_to_watch.iter().position(|x| x == "--no-daemon").unwrap();
