@@ -8,7 +8,7 @@ pub struct Watcher {
     pub path_to_watch: Vec<String>,
     pub file_watched: HashMap<PathBuf, f32>,
     pub system_info: System,
-    pub disk_read: HashMap<String, f64>,
+    pub disk_read: HashMap<String, u64>,
 }
 
 impl Default for Watcher {
