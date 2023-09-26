@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 daemonize = "0.5.0"
 entropy = "0.4.1"
+ctrlc = "3.4.1"
 sysinfo = "0.29.10"
 
 [profile.release]
@@ -13,4 +14,3 @@ codegen-units = 1
 lto = "thin"
 panic = "abort"
 debug = true
-debuginfo-level = 1

@@ -15,6 +15,7 @@ use std::{
 use std::io::Write;
 use daemonize::Daemonize;
 use sysinfo::{System, SystemExt};
+use ctrlc::*;
 
 const LOG_DIR: &str = " /var/log/irondome/irondome.log";
 const LOG_DIR_ERR: &str = " /var/log/irondome/irondome_err.log";
@@ -51,6 +52,9 @@ fn main() {
         eprintln!("{}", "SystemExt is not supported".to_ascii_uppercase());
         return;
     }
+    set_handler(|| {
+        println!("Ctrl-c received");
+        std::process::exit(1); }).unwrap();
     let mut daemon_mode: bool = true;
     let mut watcher: Watcher = Watcher::default();
     watcher.system_info.refresh_cpu();
