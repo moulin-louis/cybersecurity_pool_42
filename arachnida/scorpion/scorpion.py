@@ -1,76 +1,50 @@
 import sys
-from PIL import Image, ExifTags, ImageSequence
+from PIL import Image, ExifTags
+from PIL.ExifTags import TAGS
 
-def extract_jpeg_png(path):
-    try:
-        img = Image.open(path)
-        img_exif = img.getexif()
-        if img_exif is None:
-            return
-        if not len(img_exif.items()):
-            return
-        print('Metadata for ', path)
-        for key, val in img_exif.items():
-            if key in ExifTags.TAGS:
-                print(f'{ExifTags.TAGS[key]}:{val}')
-        print('')
-    except:
-        print("Cant open: ", path)
 
-def extract_gif(path):
-    try:
-        img = Image.open(path)
-    except:
-        print("Cant open: ", path)
+def display_exif_info(file):
+    exif_data = file.getexif()
+    if exif_data is None:
+        print('No exif data')
         return
-    width, height = img.size
-    mode = img.mode
-    format_ = img.format
-    frames = [frame.copy() for frame in ImageSequence.Iterator(img)]
-    print('Metadata for ', path)
+    if len(exif_data) == 0:
+        print('No exif data')
+        return
+    for tag_id in exif_data:
+        tag = TAGS.get(tag_id, tag_id)
+        data = exif_data.get(tag_id)
+        if isinstance(data, bytes):
+            try:
+                data = data.decode()
+            except:
+                data = "Non readable data"
+        print(f"{tag} {data}")
+
+def display_basic_info(file):
+    width, height = file.size
+    mode = file.mode
+    format_ = file.format
     print(f"Width: {width}")
     print(f"Height: {height}")
     print(f"Color Mode: {mode}")
     print(f"Format: {format_}")
-    print(f"Number of Frames: {len(frames)}")
-    print('')
+    # for key in file.info:
+    #     print(key + ': ', file.info[key])
 
-
-def extract_bmp(path):
+def scorpion(path):
+    print(path + ":")
     try:
-        img = Image.open(path)
+        file = Image.open(path)
     except:
-        print("Cant open: ", path)
+        print('Cant open: ', path)
         return
-    width, height = img.size
-    mode = img.mode
-    format_ = img.format
-    print(f"Width: {width}")
-    print(f"Height: {height}")
-    print(f"Color Mode: {mode}")
-    print(f"Format: {format_}")
-    for key in img.info:
-        print(key + ': ', img.info[key])
+    display_basic_info(file)
+    display_exif_info(file)
     print('')
+    
 
 for pos in range(len(sys.argv)):
-    file = sys.argv[pos];
     if pos == 0:
         continue
-    if str(file).endswith('.jpeg'):
-        extract_jpeg_png(file)
-        continue
-    if str(file).endswith('.jpg'):
-        extract_jpeg_png(file)
-        continue
-    if str(file).endswith('.png'):
-        extract_jpeg_png(file)
-        continue
-    if str(file).endswith('.gif'):
-        extract_gif(file)
-        continue
-    if str(file).endswith('.bmp'):
-        extract_bmp(file)
-        continue
-    else:
-        print("Wrong extension for ", file)
+    scorpion(sys.argv[pos])
