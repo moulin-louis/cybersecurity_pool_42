@@ -33,6 +33,6 @@ pub fn detect_disk_read_abuse(watcher: &mut Watcher) {
     fd.seek(SeekFrom::Start(0)).unwrap();
     watcher.disk_read = curr;
     for (name, read) in &watcher.disk_read {
-        println!("disk {}, read: {} sector so {} bytes", name, read, read * 512);
+        println!("disk {}, read: {} sector so {} MB", name, read, (read * 512) / 2048);
     }
 }
