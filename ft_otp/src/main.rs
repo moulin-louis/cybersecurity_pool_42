@@ -1,5 +1,4 @@
 use std::{io::Write, ops::{Shl, Shr}, path::Path, env::args, fs::{read, File}, time::{SystemTime, UNIX_EPOCH}};
-use sprintf::sprintf;
 
 const TIME_STEP: u128 = 30000000;
 
@@ -22,9 +21,7 @@ fn get_unix_timestamp() -> u128 {
 }
 
 fn get_hashed_key(path: &String) -> Option<Vec<u8>> {
-    path_to_string(&String::from(path)).map(
-        |value| value.as_bytes().to_vec()
-    )
+    path_to_string(&String::from(path)).map(|value| value.as_bytes().to_vec())
 }
 
 fn hmac_sha1(secret: &[u8], message: &[u8; 8]) -> Vec<u8> {
@@ -117,13 +114,7 @@ fn sha1_input(data: &[u8]) -> Option<Vec<u8>> {
         h[3] = h[3].wrapping_add(d);
         h[4] = h[4].wrapping_add(e);
     }
-    let result = match sprintf!("%08x%08x%08x%08x%08x", h[0],h[1],h[2],h[3],h[4]) {
-        Ok(value) => value,
-        Err(error) => {
-            println!("Error when calling sprintf: {:?}", error);
-            return None;
-        }
-    };
+    let result = format!("{:08x}{:08x}{:08x}{:08x}{:08x}", h[0], h[1], h[2], h[3], h[4]);
     Some(result.as_bytes().to_vec())
 }
 
@@ -200,10 +191,11 @@ fn main() {
                 None => return,
                 Some(x) => x,
             };
-            println!("Key hashed!");
             match save_key(&hashed_key) {
                 None => return,
-                Some(_x) => (),
+                Some(_x) => {
+                    println!("Key was successfully saved in ft_otp.key.");
+                },
             }
         } else if args[iter] == "-k" {
             generate_tmp_key(&args[iter + 1]);

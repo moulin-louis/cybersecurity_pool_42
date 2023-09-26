@@ -29,7 +29,7 @@ pub fn detect_disk_read_abuse(watcher: &mut Watcher) {
     }
     fd.seek(SeekFrom::Start(0)).unwrap();
     watcher.disk_read = curr;
-    for (name, read) in &watcher.disk_read {
-        println!("disk {}, {} MB", name, (read * 512) / 2048);
-    }
+    // for (name, read) in &watcher.disk_read {
+    //     println!("disk {}, {} MB", name, (read * 512) / 2048);
+    // }
 }
