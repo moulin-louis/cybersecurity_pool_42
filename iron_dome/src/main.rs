@@ -13,9 +13,16 @@ use std::{
     time::Duration,
 };
 use std::io::Write;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::Ordering::SeqCst;
 use daemonize::Daemonize;
 use sysinfo::{System, SystemExt};
 use ctrlc::*;
+use alloc_counter::{count_alloc, AllocCounterSystem};
+#[global_allocator]
+static A: AllocCounterSystem = AllocCounterSystem;
+
 
 const LOG_DIR: &str = " /var/log/irondome/irondome.log";
 const LOG_DIR_ERR: &str = " /var/log/irondome/irondome_err.log";
@@ -48,13 +55,21 @@ fn init_daemon() -> Option<()> {
 }
 
 fn main() {
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+    set_handler(move || {
+        println!("Ctrl-c received");
+        r.store(false, Ordering::SeqCst); }).unwrap();
+
     if !System::IS_SUPPORTED {
         eprintln!("{}", "SystemExt is not supported".to_ascii_uppercase());
         return;
     }
-    set_handler(|| {
-        println!("Ctrl-c received");
-        std::process::exit(1); }).unwrap();
+    let (allocs, deallocs) = count_alloc(|| {
+        let v: Vec<u8> = Vec::with_capacity(1024);
+        v
+    });
+
     let mut daemon_mode: bool = true;
     let mut watcher: Watcher = Watcher::default();
     watcher.system_info.refresh_cpu();
@@ -70,11 +85,13 @@ fn main() {
         println!("No path provided, default to $HOME");
         watcher.path_to_watch.push(env::var("HOME").expect("Cant find HOME env var"));
     }
-    loop {
+    while running.load(SeqCst) {
         detect_entropy_change(&mut watcher);
         detect_disk_read_abuse(&mut watcher);
         detect_crypto_activity(&mut watcher);
         std::io::stdout().flush().unwrap();
         thread::sleep(TTS);
     }
+    println!("Allocations: {:?}", allocs);
+    println!("Deallocations: {:?}", deallocs);
 }
