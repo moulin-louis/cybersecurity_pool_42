@@ -16,14 +16,17 @@ pub fn detect_disk_read_abuse(watcher: &mut Watcher) {
     fd.read_to_string(&mut io_data).unwrap();
     for line in io_data.lines() {
         let fields: Vec<&str> = line.split_whitespace().collect();
-        if fields.len() < 14 {
+        if fields[2].starts_with("loop") {
             continue;
+        }
+        for pos in 0..fields.len() {
+            println!("field[{}] = {}",pos, fields[pos]);
         }
         let ds: u64 = fields[5].parse::<u64>().unwrap() / 2048;
         if watcher.disk_read.contains_key(fields[2]) {
             check_abuse(fields[2].to_string(), ds,*watcher.disk_read.get(fields[2]).unwrap());
         }
-        if watcher.disk_read.contains_key(fields[2]) || watcher.disk_read.is_empty() && !fields[2].starts_with("loop") {
+        if watcher.disk_read.contains_key(fields[2]) || watcher.disk_read.is_empty() {
             curr.insert(fields[2].to_owned(), ds);
         }
     }
