@@ -35,7 +35,7 @@ fn check_abuse(pid: &Pid, new_value: u64, old_value: u64) {
 }
 
 pub fn detect_disk_read_abuse(watcher: &mut Watcher) {
-    watcher.system_info.refresh_processes();
+    // watcher.system_info.refresh_processes();
     for (pid, process) in watcher.system_info.processes() {
         if watcher.process_read.contains_key(pid) {
             let old_value: u64 = *watcher.process_read.get(pid).unwrap();

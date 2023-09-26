@@ -76,6 +76,7 @@ fn main() {
         watcher.path_to_watch.push(env::var("HOME").expect("Cant find HOME env var"));
     }
     while running.load(SeqCst) {
+        watcher.system_info.refresh_all();
         println!("- Check entropy");
         detect_entropy_change(&mut watcher);
         println!("- Check crypto");
