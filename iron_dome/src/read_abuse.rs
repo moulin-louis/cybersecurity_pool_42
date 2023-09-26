@@ -62,7 +62,7 @@ pub fn detect_disk_read_abuse(watcher: &mut Watcher) {
             mb_wrtn: fields[9].parse::<f64>().unwrap() / 2048.0,
         };
 
-        if !watcher.disk_read.is_empty() && watcher.disk_read.contains_key(fields[2]) {
+        if watcher.disk_read.contains_key(fields[2]) || watcher.disk_read.is_empty() {
             curr.insert(fields[2].to_owned(), ds);
         }
     }
