@@ -23,15 +23,14 @@ fn check_abuse(pid: &Pid, disk_usage: &DiskUsage) {
     if process::id() == pid_nbr{
         return;
     }
-    let mut path_pid: String = String::from("/proc/");
-    path_pid.push_str(pid_nbr.to_string().as_str());
-    path_pid.push_str("/comm");
-    let mut name_process: String = String::from_utf8(read_file(PathBuf::from(path_pid)).unwrap()).unwrap();
-    if name_process.contains("python3") {
-        println!("read_bytes of {} = {}", name_process, disk_usage.read_bytes);
-        println!("total = read_bytes of {} = {}", name_process, disk_usage.total_written_bytes);
+    if disk_usage.read_bytes != 0 {
+        println!("Found a potential candidate");
     }
     if disk_usage.read_bytes > THRESHOLD_READ {
+        let mut path_pid: String = String::from("/proc/");
+        path_pid.push_str(pid_nbr.to_string().as_str());
+        path_pid.push_str("/comm");
+        let mut name_process: String = String::from_utf8(read_file(PathBuf::from(path_pid)).unwrap()).unwrap();
         name_process.remove(name_process.len() - 1);
         println!("Potential read abuse : [{}]:[{}] -> {} bytes read",pid, name_process, disk_usage.read_bytes);
     }
