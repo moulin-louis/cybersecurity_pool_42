@@ -7,13 +7,18 @@ use sysinfo::{Pid, System, SystemExt};
 
 const BUFF_SIZE: usize = 1000000;
 
+pub struct IoStats {
+    pub mb_read: f64,
+    pub mb_wrtn: f64,
+}
+
 pub struct Watcher {
     pub path_to_watch: Vec<String>,
     pub file_watched: HashMap<PathBuf, f32>,
     pub system_info: System,
-    pub process_read: HashMap<Pid, u64>
+    pub process_read: HashMap<Pid, u64>,
+    pub disk_read: HashMap<String, IoStats>,
 }
-
 impl Default for Watcher {
     fn default() -> Self {
         Watcher {
@@ -25,6 +30,7 @@ impl Default for Watcher {
                 tmp
             },
             process_read: HashMap::new(),
+            disk_read: HashMap::new(),
         }
     }
 }

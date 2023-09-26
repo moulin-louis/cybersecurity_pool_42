@@ -1,6 +1,9 @@
 use std::{path::PathBuf, process};
-use std::fs::read;
+use std::collections::HashMap;
+use std::fs::{File, read};
+use std::io::{Read, Seek, SeekFrom};
 use crate::watcher::Watcher;
+use crate::watcher::IoStats;
 use sysinfo::{ProcessExt, SystemExt, Pid, PidExt};
 
 const THRESHOLD_READ: u64 = 1000000; //1MB
@@ -36,13 +39,34 @@ fn check_abuse(pid: &Pid, new_value: u64, old_value: u64) {
 
 pub fn detect_disk_read_abuse(watcher: &mut Watcher) {
     // watcher.system_info.refresh_processes();
-    for (pid, process) in watcher.system_info.processes() {
-        if watcher.process_read.contains_key(pid) {
-            let old_value: u64 = *watcher.process_read.get(pid).unwrap();
-            *watcher.process_read.get_mut(pid).unwrap() = process.disk_usage().total_read_bytes;
-            check_abuse(pid, *watcher.process_read.get(pid).unwrap(), old_value);
-        } else {
-            watcher.process_read.insert(*pid, process.disk_usage().total_read_bytes);
+    // for (pid, process) in watcher.system_info.processes() {
+    //     if watcher.process_read.contains_key(pid) {
+    //         let old_value: u64 = *watcher.process_read.get(pid).unwrap();
+    //         *watcher.process_read.get_mut(pid).unwrap() = process.disk_usage().total_read_bytes;
+    //         check_abuse(pid, *watcher.process_read.get(pid).unwrap(), old_value);
+    //     } else {
+    //         watcher.process_read.insert(*pid, process.disk_usage().total_read_bytes);
+    //     }
+    // }
+    let mut fd = File::open(&"/proc/diskstats").unwrap();
+    let mut curr: HashMap < String, IoStats > = HashMap::new();
+    let mut io_data = String::new();
+    fd.read_to_string(&mut io_data).unwrap();
+    for line in io_data.lines() {
+        let fields: Vec<&str> = line.split_whitespace().collect();
+        if fields.len() < 14 {
+            todo!("Handle gracefully this case");
+        }
+        let ds = IoStats {
+            mb_read: fields[5].parse::<f64>().unwrap() / 2048.0,
+            mb_wrtn: fields[9].parse::<f64>().unwrap() / 2048.0,
+        };
+        println!("mb read for disk: {}", ds.mb_read);
+        println!("mb write for disk: {}", ds.mb_wrtn);
+        if watcher.disk_read.contains_key(fields[2]) {
+            curr.insert(fields[2].to_owned(), ds);
         }
     }
+    fd.seek(SeekFrom::Start(0)).unwrap();
+    watcher.disk_read = curr;
 }
