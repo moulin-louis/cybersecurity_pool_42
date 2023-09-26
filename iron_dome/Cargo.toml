@@ -12,4 +12,5 @@ sysinfo = "0.29.10"
 codegen-units = 1
 lto = "thin"
 panic = "abort"
-strip = true
+debug = true
+debuginfo-level = 1
