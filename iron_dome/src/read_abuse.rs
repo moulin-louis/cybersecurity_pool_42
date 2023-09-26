@@ -3,6 +3,8 @@ use std::fs::read;
 use crate::watcher::Watcher;
 use sysinfo::{ProcessExt, SystemExt, DiskUsage, Pid, PidExt};
 
+const THRESHOLD_READ: u64 = 100000000; //100MB
+
 fn read_file(path: PathBuf) -> Result<Vec<u8>, i32> {
     match read(&path) {
         Ok(val) => Ok(val),
@@ -16,9 +18,8 @@ fn read_file(path: PathBuf) -> Result<Vec<u8>, i32> {
     }
 }
 
-const THRESHOLD_READ: u64 = 100000000; //100MB
 fn check_abuse(pid: &Pid, disk_usage: &DiskUsage) {
-    let pid_nbr = pid.as_u32();
+    let pid_nbr: u32 = pid.as_u32();
     if process::id() == pid_nbr{
         return;
     }
@@ -27,6 +28,10 @@ fn check_abuse(pid: &Pid, disk_usage: &DiskUsage) {
         path_pid.push_str(pid_nbr.to_string().as_str());
         path_pid.push_str("/comm");
         let mut name_process: String = String::from_utf8(read_file(PathBuf::from(path_pid)).unwrap()).unwrap();
+        if name_process.contains("python3") {
+            println!("read_bytes of {} = {}", name_process, disk_usage.read_bytes);
+            println!("total = read_bytes of {} = {}", name_process, disk_usage.total_written_bytes);
+        }
         name_process.remove(name_process.len() - 1);
         println!("Potential read abuse : [{}]:[{}] -> {} bytes read",pid, name_process, disk_usage.read_bytes);
     }
