@@ -38,10 +38,7 @@ fn check_abuse(pid: &Pid, disk_usage: &DiskUsage) {
 }
 
 pub fn detect_disk_read_abuse(watcher: &mut Watcher) {
-    println!("In disk read abuse");
-    println!("Refreshing processes...");
     watcher.system_info.refresh_processes();
-    println!("Refreshing disks...");
     watcher.system_info.refresh_disks();
     for (pid, process) in watcher.system_info.processes() {
         let disk_usage: DiskUsage = process.disk_usage();
