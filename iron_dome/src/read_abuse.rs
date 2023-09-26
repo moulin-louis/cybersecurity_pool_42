@@ -22,7 +22,7 @@ pub fn detect_disk_read_abuse(watcher: &mut Watcher) {
         for pos in 0..fields.len() {
             println!("field[{}] = {}",pos, fields[pos]);
         }
-        let ds: u64 = fields[5].parse::<u64>().unwrap() / 2048;
+        let ds: u64 = fields[5].parse::<u64>().unwrap();
         if watcher.disk_read.contains_key(fields[2]) {
             check_abuse(fields[2].to_string(), ds,*watcher.disk_read.get(fields[2]).unwrap());
         }
