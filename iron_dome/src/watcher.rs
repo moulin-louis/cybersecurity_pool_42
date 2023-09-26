@@ -7,6 +7,7 @@ use sysinfo::{Pid, System, SystemExt};
 
 const BUFF_SIZE: usize = 1000000;
 
+#[derive(Debug)]
 pub struct IoStats {
     pub mb_read: f64,
     pub mb_wrtn: f64,
