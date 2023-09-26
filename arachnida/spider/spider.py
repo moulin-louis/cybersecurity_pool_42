@@ -1,14 +1,14 @@
-import multiprocessing
 import os
 import signal
 import argparse
 import requests
-import datetime
 from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
-
+import threading
 
 photo_download = {}
+checked_urls = set()
+lock = threading.Lock()
 
 
 def is_valid_img(img_r):
@@ -60,15 +60,36 @@ def recurse_search(url, path, depth_level, soup):
                     spider(href, path, depth_level -1)
 
 
+def download_img_threaded(url, pathname):
+    download_img(url, pathname)
+    with lock:
+        photo_download[url] = True
+
+
 def spider(url, save_path, depth_level):
     if depth_level == 0:
         return
+    with lock:
+        if url in checked_urls:
+            return
+        checked_urls.add(url)
+    
     response = requests.get(url)
     soup= BeautifulSoup(response.text, 'html.parser')
     images = soup.find_all('img')
     img_src = get_all_img_src(images, url)
+    
+    threads = []
     for image in img_src:
-        download_img(image, save_path)
+        if image not in photo_download:
+            t = threading.Thread(target=download_img_threaded, args=(image, save_path))
+            threads.append(t)
+            t.start()
+            
+    # Wait for all threads to finish
+    for t in threads:
+        t.join()
+        
     recurse_search(url, path, depth_level, soup)
 
 
@@ -94,5 +115,5 @@ if __name__ == "__main__":
     path = args.path
     if not str(path).endswith("/"):
         path += "/"
-    depth_level = args.level;
+    depth_level = args.level
     spider(args.url, str(path), depth_level)

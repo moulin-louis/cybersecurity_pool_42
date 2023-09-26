@@ -6,9 +6,9 @@ def extract_jpeg_png(path):
         img = Image.open(path)
         img_exif = img.getexif()
         if img_exif is None:
-            print('Sorry, image has no exif data.')
+            return
         if not len(img_exif.items()):
-            print('No Metadata for ', path)
+            return
         print('Metadata for ', path)
         for key, val in img_exif.items():
             if key in ExifTags.TAGS:
@@ -54,22 +54,23 @@ def extract_bmp(path):
     print('')
 
 for pos in range(len(sys.argv)):
+    file = sys.argv[pos];
     if pos == 0:
         continue
-    if str(sys.argv[pos]).endswith('.jpeg'):
-        extract_jpeg_png(sys.argv[pos])
+    if str(file).endswith('.jpeg'):
+        extract_jpeg_png(file)
         continue
-    if str(sys.argv[pos]).endswith('.jpg'):
-        extract_jpeg_png(sys.argv[pos])
+    if str(file).endswith('.jpg'):
+        extract_jpeg_png(file)
         continue
-    if str(sys.argv[pos]).endswith('.png'):
-        extract_jpeg_png(sys.argv[pos])
+    if str(file).endswith('.png'):
+        extract_jpeg_png(file)
         continue
-    if str(sys.argv[pos]).endswith('.gif'):
-        extract_gif(sys.argv[pos])
+    if str(file).endswith('.gif'):
+        extract_gif(file)
         continue
-    if str(sys.argv[pos]).endswith('.bmp'):
-        extract_bmp(sys.argv[pos])
+    if str(file).endswith('.bmp'):
+        extract_bmp(file)
         continue
     else:
-        print("Wrong extension")
+        print("Wrong extension for ", file)
