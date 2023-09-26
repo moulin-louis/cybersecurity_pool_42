@@ -1,3 +1,11 @@
+use std::{
+    env,
+    thread,
+    fs::File,
+    io::Write,
+    time::Duration,
+    sync::{Arc, atomic::{AtomicBool, Ordering::SeqCst}},
+};
 mod watcher;
 use watcher::Watcher;
 mod entropy_check;
@@ -6,19 +14,9 @@ mod read_abuse;
 use read_abuse::detect_disk_read_abuse;
 mod crypto_activity;
 use crypto_activity::detect_crypto_activity;
-use std::{
-    env,
-    thread,
-    fs::File,
-    time::Duration,
-};
-use std::io::Write;
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool};
-use std::sync::atomic::Ordering::SeqCst;
 use daemonize::Daemonize;
 use sysinfo::{System, SystemExt};
-use ctrlc::*;
+use ctrlc::set_handler;
 
 const LOG_DIR: &str = " /var/log/irondome/irondome.log";
 const LOG_DIR_ERR: &str = " /var/log/irondome/irondome_err.log";
@@ -40,9 +38,7 @@ fn init_daemon() -> Option<()> {
         .stderr(log_file_err)
         .stdout(log_file);
     match daemonize.start() {
-        Ok(_) => {
-            Some(())
-        },
+        Ok(_) => Some(()),
         Err(err) => {
             eprintln!("Failed to launch daemon: {}", err);
             None
@@ -51,8 +47,8 @@ fn init_daemon() -> Option<()> {
 }
 
 fn main() {
-    let running = Arc::new(AtomicBool::new(true));
-    let r = running.clone();
+    let running: Arc<AtomicBool> = Arc::new(AtomicBool::new(true));
+    let r: Arc<AtomicBool> = running.clone();
     set_handler(move || {
         println!("Ctrl-c received");
         r.store(false, SeqCst); }).unwrap();
@@ -77,11 +73,8 @@ fn main() {
     }
     while running.load(SeqCst) {
         watcher.system_info.refresh_all();
-        // println!("- Check entropy");
         detect_entropy_change(&mut watcher);
-        // println!("- Check crypto");
         detect_crypto_activity(&mut watcher);
-        // println!("- Check disk_read");
         detect_disk_read_abuse(&mut watcher);
         std::io::stdout().flush().unwrap();
         thread::sleep(TTS);

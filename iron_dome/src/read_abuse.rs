@@ -10,16 +10,16 @@ fn check_abuse(disk: String, new_value: f64, old_value: f64) {
 }
 
 pub fn detect_disk_read_abuse(watcher: &mut Watcher) {
-    let mut fd = File::open("/proc/diskstats").unwrap();
+    let mut fd: File = File::open("/proc/diskstats").unwrap();
     let mut curr: HashMap < String, f64 > = HashMap::new();
-    let mut io_data = String::new();
+    let mut io_data: String = String::new();
     fd.read_to_string(&mut io_data).unwrap();
     for line in io_data.lines() {
         let fields: Vec<&str> = line.split_whitespace().collect();
         if fields.len() < 14 {
-            todo!("Handle gracefully this case");
+            continue;
         }
-        let ds = fields[5].parse::<f64>().unwrap() / 2048.0;
+        let ds: f64 = fields[5].parse::<f64>().unwrap() / 2048.0;
         if watcher.disk_read.contains_key(fields[2]) {
             check_abuse(fields[2].to_string(), ds,*watcher.disk_read.get(fields[2]).unwrap());
         }

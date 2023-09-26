@@ -1,18 +1,16 @@
-use std::{collections::HashMap, env, path::PathBuf};
-use std::fs::File;
-use std::io::Read;
-use std::path::Path;
+use std::{collections::HashMap, env, path::PathBuf, fs::File, io::Read, path::Path};
 use entropy::shannon_entropy;
-use sysinfo::{Pid, System, SystemExt};
+use sysinfo::{System, SystemExt};
 
 const BUFF_SIZE: usize = 1000000;
+
 pub struct Watcher {
     pub path_to_watch: Vec<String>,
     pub file_watched: HashMap<PathBuf, f32>,
     pub system_info: System,
-    pub process_read: HashMap<Pid, u64>,
     pub disk_read: HashMap<String, f64>,
 }
+
 impl Default for Watcher {
     fn default() -> Self {
         Watcher {
@@ -23,7 +21,6 @@ impl Default for Watcher {
                 tmp.remove(0);
                 tmp
             },
-            process_read: HashMap::new(),
             disk_read: HashMap::new(),
         }
     }

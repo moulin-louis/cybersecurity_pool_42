@@ -1,12 +1,9 @@
+use std::{fs::{read_dir, ReadDir}, path::PathBuf};
 use crate::watcher::Watcher;
-use std::fs::{read_dir, ReadDir};
-use std::path::PathBuf;
 
 fn updating_files_to_watch(watcher: &mut Watcher) {
     let mut to_delete: Vec<String> = Vec::new();
-    //iter over all path to watch
     for index in 0..watcher.path_to_watch.len() {
-        //list all files and dir into this path
         let path = &watcher.path_to_watch[index];
         let list_files: ReadDir = match read_dir(path) {
             Ok(value) => value,
@@ -16,7 +13,6 @@ fn updating_files_to_watch(watcher: &mut Watcher) {
                 continue;
             },
         };
-        //add every file (not dir) into file_watched
         for dir_entry in list_files {
             match dir_entry {
                 Err(err) => {
@@ -32,7 +28,6 @@ fn updating_files_to_watch(watcher: &mut Watcher) {
             }
         }
     }
-    //delete every dir unavailable from path_to_watch
     for path in to_delete {
         let pos: usize = watcher.path_to_watch.iter().position(|x| x == &path).unwrap();
         watcher.path_to_watch.remove(pos);
