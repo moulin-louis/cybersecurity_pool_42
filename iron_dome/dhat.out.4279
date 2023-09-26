@@ -1,0 +1,16 @@
+{"dhatFileVersion":2
+,"mode":"heap","verb":"Allocated"
+,"bklt":true,"bkacc":true
+,"tu":"instrs","Mtu":"Minstr"
+,"tuth":500
+,"cmd":"./target/release/iron_dome /home/louis/cybersecurity_pool_42/iron_dome/ --no-daemon"
+,"pid":4279
+,"te":313818793
+,"tg":0
+,"pps":
+ [
+ ]
+,"ftbl":
+ ["[root]"
+ ]
+}
