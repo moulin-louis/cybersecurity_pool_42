@@ -9,6 +9,6 @@ fn main() {
         }
     };
     for device in devices {
-        println!("{:?}", device);
+        println!("{:?}", device.name);
     }
 }
