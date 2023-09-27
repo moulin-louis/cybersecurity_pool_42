@@ -1,12 +1,15 @@
-use std::{
-    env,
-    thread,
-    fs::File,
-    time::Duration,
-    sync::{Arc, atomic::{AtomicBool, Ordering::SeqCst}},
-};
 use std::collections::HashMap;
 use std::thread::JoinHandle;
+use std::{
+    env,
+    fs::File,
+    sync::{
+        atomic::{AtomicBool, Ordering::SeqCst},
+        Arc,
+    },
+    thread,
+    time::Duration,
+};
 
 mod watcher;
 use watcher::Watcher;
@@ -16,14 +19,13 @@ mod read_abuse;
 use read_abuse::detect_disk_read_abuse;
 mod crypto_activity;
 use crypto_activity::detect_crypto_activity;
+use ctrlc::set_handler;
 use daemonize::Daemonize;
 use sysinfo::{System, SystemExt};
-use ctrlc::set_handler;
 
 const LOG_DIR: &str = " /var/log/irondome/irondome.log";
 const LOG_DIR_ERR: &str = " /var/log/irondome/irondome_err.log";
-const TTS:Duration = Duration::from_secs(2);
-
+const TTS: Duration = Duration::from_secs(2);
 
 fn init_daemon() -> Option<()> {
     let log_file: File = match File::create(LOG_DIR) {
@@ -31,14 +33,14 @@ fn init_daemon() -> Option<()> {
         Err(_) => {
             eprintln!("Impossible to create: {}", LOG_DIR);
             return None;
-        },
+        }
     };
-    let log_file_err: File = match File::create(LOG_DIR_ERR){
+    let log_file_err: File = match File::create(LOG_DIR_ERR) {
         Ok(val) => val,
         Err(_) => {
             eprintln!("Impossible to create: {}", LOG_DIR_ERR);
             return None;
-        },
+        }
     };
     let daemonize: Daemonize<()> = Daemonize::new()
         .pid_file("/tmp/test.pid")
@@ -50,17 +52,13 @@ fn init_daemon() -> Option<()> {
         Err(err) => {
             eprintln!("Failed to launch daemon: {}", err);
             None
-        },
+        }
     }
 }
 
 fn main() {
-    if !System::IS_SUPPORTED {
-        eprintln!("{}", "SystemExt is not supported".to_ascii_uppercase());
-        return;
-    }
     let mut daemon_mode: bool = true;
-    if env::args().any(|x| x == "--no-daemon") {
+    if env::args().any(|x: String| x == "--no-daemon") {
         println!("Running in foreground mode");
         daemon_mode = false;
     }
@@ -71,19 +69,27 @@ fn main() {
     let r: Arc<AtomicBool> = running.clone();
     set_handler(move || {
         println!("Ctrl-c received");
-        r.store(false, SeqCst); }).unwrap();
+        r.store(false, SeqCst);
+    })
+    .unwrap();
 
     let thread_entro: JoinHandle<()> = thread::spawn({
-        let running = running.clone();
+        let running: Arc<AtomicBool> = running.clone();
         move || {
-            let mut watcher = Watcher::default();
+            let mut watcher: Watcher = Watcher::default();
             if watcher.path_to_watch.is_empty() {
                 println!("No path provided, default to $HOME");
                 println!("Next time we advise you to provide path with your important file");
-                watcher.path_to_watch.push(env::var("HOME").expect("Cant find HOME env key"));
+                watcher
+                    .path_to_watch
+                    .push(env::var("HOME").expect("Cant find HOME env key"));
             }
             if !daemon_mode {
-                let index: usize = watcher.path_to_watch.iter().position(|x| x == "--no-daemon").unwrap();
+                let index: usize = watcher
+                    .path_to_watch
+                    .iter()
+                    .position(|x: &String| x == "--no-daemon")
+                    .unwrap();
                 watcher.path_to_watch.remove(index);
             }
             while running.load(SeqCst) {
@@ -94,7 +100,7 @@ fn main() {
     });
 
     let thread_crypto: JoinHandle<()> = thread::spawn({
-        let running = running.clone();
+        let running: Arc<AtomicBool> = running.clone();
         move || {
             let mut system_info: System = System::new();
             system_info.refresh_all();
@@ -106,7 +112,7 @@ fn main() {
     });
 
     let thread_disk: JoinHandle<()> = thread::spawn({
-        let running = running;
+        let running: Arc<AtomicBool> = running;
         move || {
             let mut disk_info: HashMap<String, u64> = HashMap::new();
             while running.load(SeqCst) {
@@ -119,5 +125,4 @@ fn main() {
     thread_entro.join().unwrap();
     thread_crypto.join().unwrap();
     thread_disk.join().unwrap();
-
 }

@@ -1,35 +1,41 @@
-use std::{fs::{read_dir, ReadDir}, path::PathBuf};
 use crate::watcher::Watcher;
+use std::{
+    fs::{read_dir, ReadDir},
+    path::PathBuf,
+};
 
 fn updating_files_to_watch(watcher: &mut Watcher) {
     let mut to_delete: Vec<String> = Vec::new();
     for index in 0..watcher.path_to_watch.len() {
-        let path = &watcher.path_to_watch[index];
+        let path: &String = &watcher.path_to_watch[index];
         let list_files: ReadDir = match read_dir(path) {
             Ok(value) => value,
             Err(err) => {
                 eprintln!("Error reading files of {}: {}", path, err);
                 to_delete.push(path.clone());
                 continue;
-            },
+            }
         };
         for dir_entry in list_files {
             match dir_entry {
                 Err(err) => {
                     eprintln!("Error read path: {}", err);
-                },
+                }
                 Ok(val) => {
                     if val.file_type().unwrap().is_dir() {
                         continue;
                     }
-                    let tmp = val.path();
-                    watcher.file_watched.entry(tmp).or_insert(0.0);
+                    watcher.file_watched.entry(val.path()).or_insert(0.0);
                 }
             }
         }
     }
     for path in to_delete {
-        let pos: usize = watcher.path_to_watch.iter().position(|x| x == &path).unwrap();
+        let pos: usize = watcher
+            .path_to_watch
+            .iter()
+            .position(|x: &String| x == &path)
+            .unwrap();
         watcher.path_to_watch.remove(pos);
     }
 }

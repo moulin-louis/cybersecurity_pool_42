@@ -1,5 +1,5 @@
-use std::{collections::HashMap, env, path::PathBuf, fs::File, io::Read, path::Path};
 use entropy::shannon_entropy;
+use std::{collections::HashMap, env, fs::File, io::Read, path::Path, path::PathBuf};
 
 const BUFF_SIZE: usize = 1000000;
 
@@ -38,9 +38,9 @@ fn get_entropy(path: &Path) -> Option<f32> {
             Err(err) => {
                 println!("Error reading file: {}", err);
                 return None;
-            },
+            }
         };
-        if byte_read == 0{
+        if byte_read == 0 {
             break;
         }
         result += shannon_entropy(&buff[0..byte_read]);
@@ -66,7 +66,7 @@ impl Watcher {
             }
         };
         let ref_value: &mut f32 = self.file_watched.get_mut(val).unwrap();
-        handle_entropy_change(*ref_value,new_entropy, val);
+        handle_entropy_change(*ref_value, new_entropy, val);
         *ref_value = new_entropy;
         Some(())
     }
