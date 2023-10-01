@@ -56,5 +56,6 @@ dkms.conf
 */.idea
 ./.idea
 */*/.vscode
+*/.vscode
 */Cargo.lock
 */target
