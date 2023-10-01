@@ -1,30 +1,29 @@
 use std::{
     collections::HashMap,
     fs::File,
-    io::{Read, Seek, SeekFrom},
+    io::{Read, Seek, SeekFrom}, sync::{Arc, atomic::AtomicBool, Mutex, MutexGuard},
 };
 
 const THRESHOLD_READ: u64 = 10000000; //10MB
 
-fn check_abuse(disk: String, new_value: u64, old_value: u64) {
-    if new_value - old_value > THRESHOLD_READ {
-        println!("Potential disk abuse detected for [{}]", disk);
-    }
-}
-
-pub fn detect_disk_read_abuse(watcher: &mut HashMap<String, u64>) {
+pub fn detect_disk_read_abuse(watcher: &mut HashMap<String, u64>, flag_arc: &mut Arc<Mutex<[AtomicBool; 3]>>) {
+    let mut found_disk_sus: bool = false;
     let mut fd: File = File::open("/proc/diskstats").unwrap();
     let mut curr: HashMap<String, u64> = HashMap::new();
     let mut io_data: String = String::new();
     fd.read_to_string(&mut io_data).unwrap();
     for line in io_data.lines() {
         let fields: Vec<&str> = line.split_whitespace().collect();
-        if fields[2].starts_with("loop") {
+        if fields[2].starts_with("loop") || fields[2].starts_with("ram") {
             continue;
         }
         let ds: u64 = fields[5].parse::<u64>().unwrap();
-        if watcher.contains_key(fields[2]) {
-            check_abuse(fields[2].to_string(), ds, *watcher.get(fields[2]).unwrap());
+        if watcher.contains_key(fields[2]) && (ds - *watcher.get(fields[2]).unwrap() > THRESHOLD_READ) {
+            found_disk_sus = true;
+            //flaging disk_flag for all thread 
+            let mut flags: MutexGuard<'_, [AtomicBool; 3]> = flag_arc.lock().unwrap();
+            flags[1] = AtomicBool::new(true);
+            println!("Potential disk abuse detected for [{}]", fields[2]);
         }
         if watcher.contains_key(fields[2]) || watcher.is_empty() {
             curr.insert(fields[2].to_owned(), ds);
@@ -32,4 +31,8 @@ pub fn detect_disk_read_abuse(watcher: &mut HashMap<String, u64>) {
     }
     fd.seek(SeekFrom::Start(0)).unwrap();
     *watcher = curr;
+    if !found_disk_sus {
+        let mut flags: MutexGuard<'_, [AtomicBool; 3]> = flag_arc.lock().unwrap();
+        flags[1] = AtomicBool::new(false);
+    }
 }

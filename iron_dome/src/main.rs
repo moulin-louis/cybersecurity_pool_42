@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::sync::MutexGuard;
 use std::thread::JoinHandle;
 use std::{
     env,
@@ -6,6 +7,7 @@ use std::{
     sync::{
         atomic::{AtomicBool, Ordering::SeqCst},
         Arc,
+        Mutex,
     },
     thread,
     time::Duration,
@@ -65,16 +67,17 @@ fn main() {
     if daemon_mode && init_daemon().is_none() {
         return;
     }
-    let running: Arc<AtomicBool> = Arc::new(AtomicBool::new(true));
+    let ranson_flag: Arc<Mutex<[AtomicBool; 3]>> = Arc::new(Mutex::new([AtomicBool::new(false),AtomicBool::new(false), AtomicBool::new(false)]));
+    let running: Arc<AtomicBool> = Arc::new(AtomicBool::new(true)); 
     let r: Arc<AtomicBool> = running.clone();
     set_handler(move || {
         println!("Ctrl-c received");
-        r.store(false, SeqCst);
-    })
-    .unwrap();
+        r.clone().store(false, SeqCst);
+    }).unwrap();
 
     let thread_entro: JoinHandle<()> = thread::spawn({
         let running: Arc<AtomicBool> = running.clone();
+        let mut flag: Arc<Mutex<[AtomicBool; 3]>> = ranson_flag.clone();
         move || {
             let mut watcher: Watcher = Watcher::default();
             if watcher.path_to_watch.is_empty() {
@@ -93,7 +96,7 @@ fn main() {
                 watcher.path_to_watch.remove(index);
             }
             while running.load(SeqCst) {
-                detect_entropy_change(&mut watcher);
+                detect_entropy_change(&mut watcher, &mut flag);
                 thread::sleep(TTS);
             }
         }
@@ -101,22 +104,41 @@ fn main() {
 
     let thread_crypto: JoinHandle<()> = thread::spawn({
         let running: Arc<AtomicBool> = running.clone();
+        let mut flag: Arc<Mutex<[AtomicBool; 3]>> = ranson_flag.clone();
         move || {
             let mut system_info: System = System::new();
             system_info.refresh_all();
             while running.load(SeqCst) {
-                detect_crypto_activity(&mut system_info);
+                detect_crypto_activity(&mut system_info, &mut flag);
                 thread::sleep(TTS);
             }
         }
     });
 
     let thread_disk: JoinHandle<()> = thread::spawn({
-        let running: Arc<AtomicBool> = running;
+        let running: Arc<AtomicBool> = running.clone();
+        let mut flag: Arc<Mutex<[AtomicBool; 3]>> = ranson_flag.clone();
         move || {
             let mut disk_info: HashMap<String, u64> = HashMap::new();
             while running.load(SeqCst) {
-                detect_disk_read_abuse(&mut disk_info);
+                detect_disk_read_abuse(&mut disk_info, &mut flag);
+                thread::sleep(TTS);
+            }
+        }
+    });
+
+    let thread_check: JoinHandle<()> = thread::spawn({
+        let running: Arc<AtomicBool> = running;
+        let flag: Arc<Mutex<[AtomicBool; 3]>> = ranson_flag.clone();
+        move || {
+            while running.load(SeqCst) {
+               {
+                    let flags: MutexGuard<'_, [AtomicBool; 3]> = flag.lock().unwrap();
+                    println!("Entropy flag:\t{:?}", flags[0]);
+                    println!("Disk flag:\t{:?}", flags[1]);
+                    println!("Crypto flag:\t{:?}", flags[2]);
+                    println!("");
+                }
                 thread::sleep(TTS);
             }
         }
@@ -125,4 +147,5 @@ fn main() {
     thread_entro.join().unwrap();
     thread_crypto.join().unwrap();
     thread_disk.join().unwrap();
+    thread_check.join().unwrap();
 }

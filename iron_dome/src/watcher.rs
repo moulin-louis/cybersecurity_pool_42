@@ -1,5 +1,5 @@
 use entropy::shannon_entropy;
-use std::{collections::HashMap, env, fs::File, io::Read, path::Path, path::PathBuf};
+use std::{collections::HashMap, env, fs::File, io::Read, path::Path, path::PathBuf, sync::{Arc, Mutex, atomic::AtomicBool, MutexGuard}};
 
 const BUFF_SIZE: usize = 1000000;
 
@@ -50,14 +50,8 @@ fn get_entropy(path: &Path) -> Option<f32> {
     Some(result)
 }
 
-fn handle_entropy_change(old_entro: f32, new_entro: f32, val: &PathBuf) {
-    if old_entro != 0.0 && (new_entro - old_entro).abs() > 1.0 {
-        println!("Potential encryption of file: {:?}", val);
-    }
-}
-
 impl Watcher {
-    pub fn update_entropy(&mut self, val: &PathBuf) -> Option<()> {
+    pub fn update_entropy(&mut self, val: &PathBuf, flag_arc: &mut Arc<Mutex<[AtomicBool; 3]>>) -> Option<i32> {
         let new_entropy: f32 = match get_entropy(val) {
             Some(val) => val,
             None => {
@@ -66,8 +60,14 @@ impl Watcher {
             }
         };
         let ref_value: &mut f32 = self.file_watched.get_mut(val).unwrap();
-        handle_entropy_change(*ref_value, new_entropy, val);
+        if *ref_value != 0.0 && (new_entropy - *ref_value).abs() > 1.0 {
+            let mut flags: MutexGuard<'_, [AtomicBool; 3]> = flag_arc.lock().unwrap();
+            flags[0] = AtomicBool::new(true);
+            println!("Potential encryption of file: {:?}", val);
+            *ref_value = new_entropy;
+            return Some(2);
+        }
         *ref_value = new_entropy;
-        Some(())
+        Some(1)
     }
 }

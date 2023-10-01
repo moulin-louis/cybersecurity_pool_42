@@ -1,6 +1,7 @@
 use std::{
     borrow::Cow,
     process::{Command, Output},
+    sync::{Arc, atomic::AtomicBool, Mutex, MutexGuard}
 };
 use sysinfo::{ProcessExt, System, SystemExt};
 
@@ -20,14 +21,15 @@ fn check_linked_lib(libraries: &str) -> bool {
     false
 }
 
-pub fn detect_crypto_activity(system_info: &mut System) {
+pub fn detect_crypto_activity(system_info: &mut System, flag_arc: &mut Arc<Mutex<[AtomicBool; 3]>> ) {
+    let mut found_process_sus: bool = false;
     system_info.refresh_all();
     system_info.refresh_cpu();
     for process in system_info.processes().values() {
         let output: Output = match Command::new("ldd").arg(process.exe()).output() {
             Ok(val) => val,
             Err(err) => {
-                println!("Cant launch command ldd: {}", err);
+                eprintln!("Cant launch command ldd: {}", err);
                 continue;
             }
         };
@@ -35,10 +37,18 @@ pub fn detect_crypto_activity(system_info: &mut System) {
         if check_linked_lib(&libraries)
             && process.cpu_usage() > (100.0 / system_info.cpus().len() as f32)
         {
+            found_process_sus = true;
+            //flaging crypto for all thread 
+            let mut flags: MutexGuard<'_, [AtomicBool; 3]> = flag_arc.lock().unwrap();
+            flags[2] = AtomicBool::new(true);
             println!(
                 "Process: {}, potential high cryptographic activity",
-                process.name()
+                process.exe().display()
             );
         }
+    }
+    if found_process_sus == false {
+        let mut flags: MutexGuard<'_, [AtomicBool; 3]> = flag_arc.lock().unwrap();
+        flags[2] = AtomicBool::new(false);
     }
 }
