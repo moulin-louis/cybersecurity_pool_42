@@ -45,7 +45,7 @@ fn init_daemon() -> Option<()> {
     let daemonize: Daemonize<()> = Daemonize::new()
         .pid_file("/tmp/test.pid")
         .working_directory("/tmp")
-        .stderr(log_file_err)
+        .stderr(log_file.try_clone().unwrap())
         .stdout(log_file);
     match daemonize.start() {
         Ok(_) => Some(()),
