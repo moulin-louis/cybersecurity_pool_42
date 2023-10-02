@@ -6,7 +6,8 @@ shutdown() {
     echo "Killing read test..."
     pkill -f read_test.py
     echo "Killing entropy test..."
-    pkill -f entropy_test.py
+    pkill -f bash
+    rm file_test
     rm -rf crypto_test
     echo "All cleanup done."
 }
