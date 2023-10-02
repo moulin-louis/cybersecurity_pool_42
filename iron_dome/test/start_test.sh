@@ -1,5 +1,4 @@
 #!/bin/fish
-
 shutdown() {
     echo "Killing crypto test..."
     pkill -f crypto_test
@@ -16,8 +15,8 @@ echo 'Creating bigfile for testing...'
 if  [ ! -f "./bigfile" ]; then
     dd if=/dev/urandom of=bigfile bs=1G count=1
 fi
-echo 'Setuping for SIGINT'
-trap shutdown SIGINT SIGTERM
+echo 'Setup for SIGINT'
+trap shutdown SIGINT
 
 gcc -o crypto_test crypto_test.c -lcrypto
 echo 'Running crypto_test'
@@ -25,5 +24,5 @@ echo 'Running crypto_test'
 echo 'Running read_test'
 python3 read_test.py &
 echo 'Running entropy_test'
-bash entropy_test.sh &
-tail -f
+bsh entropy_test.sh &
+while true; ;end
