@@ -5,6 +5,7 @@ def read_large_file_in_chunks(filename, chunk_size=1024*1024, limit=1024*1024*10
         total_read = 0
         f = open('./bigfile', 'rb')
         while total_read < limit:
+            print('One iter of bigfile read')
             chunk = f.read(chunk_size)
             total_read += len(chunk)
             del chunk
