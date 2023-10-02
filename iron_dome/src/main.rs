@@ -35,13 +35,13 @@ fn init_daemon() -> Option<()> {
             return None;
         }
     };
-    let log_file_err: File = match File::create(LOG_DIR_ERR) {
-        Ok(val) => val,
-        Err(_) => {
-            eprintln!("{color_red}ERROR: Impossible to create: {}", LOG_DIR_ERR);
-            return None;
-        }
-    };
+    // let log_file_err: File = match File::create(LOG_DIR_ERR) {
+    //     Ok(val) => val,
+    //     Err(_) => {
+    //         eprintln!("{color_red}ERROR: Impossible to create: {}", LOG_DIR_ERR);
+    //         return None;
+    //     }
+    // };
     let daemonize: Daemonize<()> = Daemonize::new()
         .pid_file("/tmp/test.pid")
         .working_directory("/tmp")
