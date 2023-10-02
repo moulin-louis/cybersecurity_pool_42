@@ -137,7 +137,7 @@ fn main() {
             while running.load(SeqCst) {
                 {
                     let flags: MutexGuard<'_, [AtomicBool; 3]> = flag.lock().unwrap();
-                    if flags[0].load(SeqCst) && flags[1].load(SeqCst) && flag[2].load(SeqCst) {
+                    if flags[0].load(SeqCst) && flags[1].load(SeqCst) && flags[2].load(SeqCst) {
                         println!("WARNING: POTENTIAL RANSONWARE RUNNING ON YOUR PC !!!!!");
                     }
                 }
