@@ -1,5 +1,14 @@
 use entropy::shannon_entropy;
-use std::{collections::HashMap, env, fs::File, io::Read, path::Path, path::PathBuf, sync::{Arc, Mutex, atomic::AtomicBool, MutexGuard}};
+use inline_colorization::{color_red, color_yellow};
+use std::{
+    collections::HashMap,
+    env,
+    fs::File,
+    io::Read,
+    path::Path,
+    path::PathBuf,
+    sync::{atomic::AtomicBool, Arc, Mutex, MutexGuard},
+};
 
 const BUFF_SIZE: usize = 1000000;
 
@@ -26,7 +35,7 @@ fn get_entropy(path: &Path) -> Option<f32> {
     let mut f: File = match File::open(path) {
         Ok(val) => val,
         Err(err) => {
-            println!("Error opening file: {}", err);
+            eprintln!("{color_red}ERROR: Error opening file: {}", err);
             return None;
         }
     };
@@ -36,7 +45,7 @@ fn get_entropy(path: &Path) -> Option<f32> {
         let byte_read: usize = match f.read(&mut buff) {
             Ok(val) => val,
             Err(err) => {
-                println!("Error reading file: {}", err);
+                eprintln!("{color_red}ERROR: Error reading file: {}", err);
                 return None;
             }
         };
@@ -51,7 +60,11 @@ fn get_entropy(path: &Path) -> Option<f32> {
 }
 
 impl Watcher {
-    pub fn update_entropy(&mut self, val: &PathBuf, flag_arc: &mut Arc<Mutex<[AtomicBool; 3]>>) -> Option<i32> {
+    pub fn update_entropy(
+        &mut self,
+        val: &PathBuf,
+        flag_arc: &mut Arc<Mutex<[AtomicBool; 3]>>,
+    ) -> Option<i32> {
         let new_entropy: f32 = match get_entropy(val) {
             Some(val) => val,
             None => {
@@ -63,7 +76,10 @@ impl Watcher {
         if *ref_value != 0.0 && (new_entropy - *ref_value).abs() > 1.0 {
             let mut flags: MutexGuard<'_, [AtomicBool; 3]> = flag_arc.lock().unwrap();
             flags[0] = AtomicBool::new(true);
-            println!("Potential encryption of file: {:?}", val);
+            println!(
+                "{color_yellow}WARNING: Potential encryption of file: {:?}",
+                val
+            );
             *ref_value = new_entropy;
             return Some(2);
         }

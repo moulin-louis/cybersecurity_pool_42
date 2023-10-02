@@ -1,7 +1,8 @@
+use inline_colorization::{color_red, color_yellow};
 use std::{
     borrow::Cow,
     process::{Command, Output},
-    sync::{Arc, atomic::AtomicBool, Mutex, MutexGuard}
+    sync::{atomic::AtomicBool, Arc, Mutex, MutexGuard},
 };
 use sysinfo::{ProcessExt, System, SystemExt};
 
@@ -21,7 +22,10 @@ fn check_linked_lib(libraries: &str) -> bool {
     false
 }
 
-pub fn detect_crypto_activity(system_info: &mut System, flag_arc: &mut Arc<Mutex<[AtomicBool; 3]>> ) {
+pub fn detect_crypto_activity(
+    system_info: &mut System,
+    flag_arc: &mut Arc<Mutex<[AtomicBool; 3]>>,
+) {
     let mut found_process_sus: bool = false;
     system_info.refresh_all();
     system_info.refresh_cpu();
@@ -29,7 +33,7 @@ pub fn detect_crypto_activity(system_info: &mut System, flag_arc: &mut Arc<Mutex
         let output: Output = match Command::new("ldd").arg(process.exe()).output() {
             Ok(val) => val,
             Err(err) => {
-                eprintln!("Cant launch command ldd: {}", err);
+                eprintln!("{color_red}ERROR: Cant launch command ldd: {}", err);
                 continue;
             }
         };
@@ -38,16 +42,16 @@ pub fn detect_crypto_activity(system_info: &mut System, flag_arc: &mut Arc<Mutex
             && process.cpu_usage() > (100.0 / system_info.cpus().len() as f32)
         {
             found_process_sus = true;
-            //flaging crypto for all thread 
+            //flaging crypto for all thread
             let mut flags: MutexGuard<'_, [AtomicBool; 3]> = flag_arc.lock().unwrap();
             flags[2] = AtomicBool::new(true);
             println!(
-                "Process: {}, potential high cryptographic activity",
+                "{color_yellow}WARNING: Process: {}, potential high cryptographic activity",
                 process.exe().display()
             );
         }
     }
-    if found_process_sus == false {
+    if !found_process_sus {
         let mut flags: MutexGuard<'_, [AtomicBool; 3]> = flag_arc.lock().unwrap();
         flags[2] = AtomicBool::new(false);
     }

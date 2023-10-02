@@ -21,8 +21,8 @@ mod crypto_activity;
 use crypto_activity::detect_crypto_activity;
 use ctrlc::set_handler;
 use daemonize::Daemonize;
+use inline_colorization::{color_green, color_red, color_yellow};
 use sysinfo::{System, SystemExt};
-
 const LOG_DIR: &str = " /var/log/irondome/irondome.log";
 const LOG_DIR_ERR: &str = " /var/log/irondome/irondome_err.log";
 const TTS: Duration = Duration::from_secs(2);
@@ -31,14 +31,14 @@ fn init_daemon() -> Option<()> {
     let log_file: File = match File::create(LOG_DIR) {
         Ok(val) => val,
         Err(_) => {
-            eprintln!("Impossible to create: {}", LOG_DIR);
+            eprintln!("{color_red}ERROR: Impossible to create: {}", LOG_DIR);
             return None;
         }
     };
     let log_file_err: File = match File::create(LOG_DIR_ERR) {
         Ok(val) => val,
         Err(_) => {
-            eprintln!("Impossible to create: {}", LOG_DIR_ERR);
+            eprintln!("{color_red}ERROR: Impossible to create: {}", LOG_DIR_ERR);
             return None;
         }
     };
@@ -50,7 +50,7 @@ fn init_daemon() -> Option<()> {
     match daemonize.start() {
         Ok(_) => Some(()),
         Err(err) => {
-            eprintln!("Failed to launch daemon: {}", err);
+            eprintln!("{color_red}ERROR: Failed to launch daemon: {}", err);
             None
         }
     }
@@ -59,7 +59,7 @@ fn init_daemon() -> Option<()> {
 fn main() {
     let mut daemon_mode: bool = true;
     if env::args().any(|x: String| x == "--no-daemon") {
-        println!("Running in foreground mode");
+        println!("{color_green}INFO: Running in foreground mode");
         daemon_mode = false;
     }
     if daemon_mode && init_daemon().is_none() {
@@ -73,7 +73,7 @@ fn main() {
     let running: Arc<AtomicBool> = Arc::new(AtomicBool::new(true));
     let r: Arc<AtomicBool> = running.clone();
     set_handler(move || {
-        println!("Ctrl-c received");
+        println!("{color_green}INFO: Ctrl-c received");
         r.clone().store(false, SeqCst);
     })
     .unwrap();
@@ -84,8 +84,8 @@ fn main() {
         move || {
             let mut watcher: Watcher = Watcher::default();
             if watcher.path_to_watch.is_empty() {
-                println!("No path provided, default to $HOME");
-                println!("Next time we advise you to provide path with your important file");
+                println!("{color_yellow}WARNING: No path provided, default to $HOME");
+                println!("{color_yellow}WARNING:Next time we advise you to provide path with your important file");
                 watcher
                     .path_to_watch
                     .push(env::var("HOME").expect("Cant find HOME env key"));
@@ -138,7 +138,9 @@ fn main() {
                 {
                     let flags: MutexGuard<'_, [AtomicBool; 3]> = flag.lock().unwrap();
                     if flags[0].load(SeqCst) && flags[1].load(SeqCst) && flags[2].load(SeqCst) {
-                        println!("WARNING: POTENTIAL RANSONWARE RUNNING ON YOUR PC !!!!!");
+                        println!(
+                            "{color_red}MENACE: POTENTIAL RANSOMWARE RUNNING ON YOUR PC !!!!!"
+                        );
                     }
                 }
                 thread::sleep(TTS);

@@ -1,3 +1,4 @@
+use inline_colorization::color_yellow;
 use std::{
     collections::HashMap,
     fs::File,
@@ -29,7 +30,10 @@ pub fn detect_disk_read_abuse(
                 //flagging disk_flag for all thread
                 let mut flags: MutexGuard<'_, [AtomicBool; 3]> = flag_arc.lock().unwrap();
                 flags[1] = AtomicBool::new(true);
-                println!("Potential disk abuse detected for [{}]", fields[2]);
+                println!(
+                    "{color_yellow}WARNING: Potential disk abuse detected for [{}]",
+                    fields[2]
+                );
             }
         }
         if watcher.contains_key(fields[2]) || watcher.is_empty() {

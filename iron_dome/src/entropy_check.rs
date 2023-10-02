@@ -1,4 +1,5 @@
 use crate::watcher::Watcher;
+use inline_colorization::color_red;
 use std::{
     fs::{read_dir, ReadDir},
     path::PathBuf,
@@ -12,7 +13,7 @@ fn updating_files_to_watch(watcher: &mut Watcher) {
         let list_files: ReadDir = match read_dir(path) {
             Ok(value) => value,
             Err(err) => {
-                eprintln!("Error reading files of {}: {}", path, err);
+                eprintln!("{color_red}ERROR: Error reading files of {}: {}", path, err);
                 to_delete.push(path.clone());
                 continue;
             }
@@ -20,7 +21,7 @@ fn updating_files_to_watch(watcher: &mut Watcher) {
         for dir_entry in list_files {
             match dir_entry {
                 Err(err) => {
-                    eprintln!("Error read path: {}", err);
+                    eprintln!("{color_red}ERROR: Error read path: {}", err);
                 }
                 Ok(val) => {
                     if val.file_type().unwrap().is_dir() {
@@ -47,7 +48,7 @@ fn update_entropy_file_to_watch(watcher: &mut Watcher, flag_arc: &mut Arc<Mutex<
     for (key, _val) in watcher.file_watched.clone() {
         match watcher.update_entropy(&key, flag_arc) {
             None => {
-                eprintln!("files_to_watch change, aborting current loop");
+                eprintln!("{color_red}ERROR: files_to_watch change, aborting current loop");
                 to_delete.push(key.clone());
                 break;
             }
