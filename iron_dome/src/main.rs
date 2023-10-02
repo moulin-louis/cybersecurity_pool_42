@@ -1,15 +1,13 @@
-use std::collections::HashMap;
-use std::sync::MutexGuard;
-use std::thread::JoinHandle;
 use std::{
+    collections::HashMap,
     env,
     fs::File,
     sync::{
         atomic::{AtomicBool, Ordering::SeqCst},
-        Arc,
-        Mutex,
+        Arc, Mutex, MutexGuard,
     },
     thread,
+    thread::JoinHandle,
     time::Duration,
 };
 
@@ -67,13 +65,18 @@ fn main() {
     if daemon_mode && init_daemon().is_none() {
         return;
     }
-    let ranson_flag: Arc<Mutex<[AtomicBool; 3]>> = Arc::new(Mutex::new([AtomicBool::new(false),AtomicBool::new(false), AtomicBool::new(false)]));
-    let running: Arc<AtomicBool> = Arc::new(AtomicBool::new(true)); 
+    let ranson_flag: Arc<Mutex<[AtomicBool; 3]>> = Arc::new(Mutex::new([
+        AtomicBool::new(false),
+        AtomicBool::new(false),
+        AtomicBool::new(false),
+    ]));
+    let running: Arc<AtomicBool> = Arc::new(AtomicBool::new(true));
     let r: Arc<AtomicBool> = running.clone();
     set_handler(move || {
         println!("Ctrl-c received");
         r.clone().store(false, SeqCst);
-    }).unwrap();
+    })
+    .unwrap();
 
     let thread_entro: JoinHandle<()> = thread::spawn({
         let running: Arc<AtomicBool> = running.clone();
@@ -129,15 +132,15 @@ fn main() {
 
     let thread_check: JoinHandle<()> = thread::spawn({
         let running: Arc<AtomicBool> = running;
-        let flag: Arc<Mutex<[AtomicBool; 3]>> = ranson_flag.clone();
+        let flag: Arc<Mutex<[AtomicBool; 3]>> = ranson_flag;
         move || {
             while running.load(SeqCst) {
-               {
+                {
                     let flags: MutexGuard<'_, [AtomicBool; 3]> = flag.lock().unwrap();
                     println!("Entropy flag:\t{:?}", flags[0]);
                     println!("Disk flag:\t{:?}", flags[1]);
                     println!("Crypto flag:\t{:?}", flags[2]);
-                    println!("");
+                    println!();
                 }
                 thread::sleep(TTS);
             }
