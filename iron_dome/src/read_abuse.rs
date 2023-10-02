@@ -1,12 +1,16 @@
 use std::{
     collections::HashMap,
     fs::File,
-    io::{Read, Seek, SeekFrom}, sync::{Arc, atomic::AtomicBool, Mutex, MutexGuard},
+    io::{Read, Seek, SeekFrom},
+    sync::{atomic::AtomicBool, Arc, Mutex, MutexGuard},
 };
 
 const THRESHOLD_READ: u64 = 10000000; //10MB
 
-pub fn detect_disk_read_abuse(watcher: &mut HashMap<String, u64>, flag_arc: &mut Arc<Mutex<[AtomicBool; 3]>>) {
+pub fn detect_disk_read_abuse(
+    watcher: &mut HashMap<String, u64>,
+    flag_arc: &mut Arc<Mutex<[AtomicBool; 3]>>,
+) {
     let mut found_disk_sus: bool = false;
     let mut fd: File = File::open("/proc/diskstats").unwrap();
     let mut curr: HashMap<String, u64> = HashMap::new();
@@ -18,9 +22,11 @@ pub fn detect_disk_read_abuse(watcher: &mut HashMap<String, u64>, flag_arc: &mut
             continue;
         }
         let ds: u64 = fields[5].parse::<u64>().unwrap();
-        if watcher.contains_key(fields[2]) && (ds - *watcher.get(fields[2]).unwrap() > THRESHOLD_READ) {
+        if watcher.contains_key(fields[2])
+            && (ds - *watcher.get(fields[2]).unwrap() > THRESHOLD_READ)
+        {
             found_disk_sus = true;
-            //flaging disk_flag for all thread 
+            //flaging disk_flag for all thread
             let mut flags: MutexGuard<'_, [AtomicBool; 3]> = flag_arc.lock().unwrap();
             flags[1] = AtomicBool::new(true);
             println!("Potential disk abuse detected for [{}]", fields[2]);
@@ -34,5 +40,8 @@ pub fn detect_disk_read_abuse(watcher: &mut HashMap<String, u64>, flag_arc: &mut
     if !found_disk_sus {
         let mut flags: MutexGuard<'_, [AtomicBool; 3]> = flag_arc.lock().unwrap();
         flags[1] = AtomicBool::new(false);
+    }
+    for (disk, read) in watcher {
+        println!("{}: {}/{} sector/bytes read", disk, read, read * 512);
     }
 }
