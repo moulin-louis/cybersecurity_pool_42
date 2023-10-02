@@ -137,10 +137,9 @@ fn main() {
             while running.load(SeqCst) {
                 {
                     let flags: MutexGuard<'_, [AtomicBool; 3]> = flag.lock().unwrap();
-                    println!("Entropy flag:\t{:?}", flags[0]);
-                    println!("Disk flag:\t{:?}", flags[1]);
-                    println!("Crypto flag:\t{:?}", flags[2]);
-                    println!();
+                    if flags[0].load(SeqCst) && flags[1].load(SeqCst) && flag[2].load(SeqCst) {
+                        println!("WARNING: POTENTIAL RANSONWARE RUNNING ON YOUR PC !!!!!");
+                    }
                 }
                 thread::sleep(TTS);
             }
