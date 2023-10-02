@@ -10,6 +10,7 @@ function shutdown
     rm -rf file_test
     rm -rf crypto_test
     echo "All cleanup done."
+    exit
 end
 
 echo 'Creating bigfile for testing...'
