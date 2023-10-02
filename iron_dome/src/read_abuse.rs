@@ -24,7 +24,7 @@ pub fn detect_disk_read_abuse(
         let ds: u64 = fields[5].parse::<u64>().unwrap();
         if watcher.contains_key(fields[2]) {
             let read_since: u64 = ds - *watcher.get(fields[2]).unwrap();
-            println!("total read for disk {} = {}", fields[2], read_since);
+            println!("read_since for disk {} = {}", fields[2], read_since);
             if read_since > THRESHOLD_READ {
                 found_disk_sus = true;
                 //flaging disk_flag for all thread
