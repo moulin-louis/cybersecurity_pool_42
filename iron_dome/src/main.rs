@@ -30,7 +30,11 @@ const LOG_FILE: &str = "/var/log/irondome/irondome.log";
 const TTS: Duration = Duration::from_secs(2);
 
 fn init_daemon() -> Option<()> {
-    Command::new("mkdir").arg("-p").arg(LOG_DIR);
+    Command::new("mkdir")
+        .arg("-p")
+        .arg(LOG_DIR)
+        .output()
+        .expect("Cant create folder for log files");
     let log_file: File = match File::create(LOG_FILE) {
         Ok(val) => val,
         Err(_) => {
