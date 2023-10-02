@@ -5,7 +5,7 @@ use std::{
     sync::{atomic::AtomicBool, Arc, Mutex, MutexGuard},
 };
 
-const THRESHOLD_READ: u64 = 10000000; //10MB
+const THRESHOLD_READ: u64 = 2000000; //2MB
 
 pub fn detect_disk_read_abuse(
     watcher: &mut HashMap<String, u64>,
