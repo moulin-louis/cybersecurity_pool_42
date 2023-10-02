@@ -24,10 +24,9 @@ pub fn detect_disk_read_abuse(
         let ds: u64 = fields[5].parse::<u64>().unwrap();
         if watcher.contains_key(fields[2]) {
             let read_since: u64 = ds - *watcher.get(fields[2]).unwrap();
-            println!("read_since for disk {} = {}", fields[2], read_since);
             if read_since > THRESHOLD_READ {
                 found_disk_sus = true;
-                //flaging disk_flag for all thread
+                //flagging disk_flag for all thread
                 let mut flags: MutexGuard<'_, [AtomicBool; 3]> = flag_arc.lock().unwrap();
                 flags[1] = AtomicBool::new(true);
                 println!("Potential disk abuse detected for [{}]", fields[2]);
@@ -43,7 +42,4 @@ pub fn detect_disk_read_abuse(
         let mut flags: MutexGuard<'_, [AtomicBool; 3]> = flag_arc.lock().unwrap();
         flags[1] = AtomicBool::new(false);
     }
-    // for (disk, read) in watcher {
-    //     println!("{}: {}/{} sector/bytes read", disk, read, *read * 512);
-    // }
 }
