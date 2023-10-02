@@ -8,6 +8,7 @@ def read_large_file_in_chunks(filename, chunk_size=1024*1024, limit=1024*1024*10
             chunk = f.read(chunk_size)
             total_read += len(chunk)
             del chunk
+        print('One iter of bigfile read')
 
 def spawn_readers(num_processes, filename='bigfile', chunk_size=1024*1024, limit=1024*1024*10):
     processes = []
@@ -19,5 +20,4 @@ def spawn_readers(num_processes, filename='bigfile', chunk_size=1024*1024, limit
     for p in processes:
         p.join()
 
-while True:
-    spawn_readers(30)
+spawn_readers(30)
