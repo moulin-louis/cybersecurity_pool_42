@@ -5,8 +5,9 @@ shutdown() {
     echo "Killing read test..."
     pkill -f read_test.py
     echo "Killing entropy test..."
-    pkill -f bash
-    rm file_test
+    pkill -f entropy_test.sh
+    pkill -f entropy_test
+    rm -rf file_test
     rm -rf crypto_test
     echo "All cleanup done."
 }
@@ -24,5 +25,5 @@ echo 'Running crypto_test'
 echo 'Running read_test'
 python3 read_test.py &
 echo 'Running entropy_test'
-bsh entropy_test.sh &
+./entropy_test.sh &
 while true; ;end
