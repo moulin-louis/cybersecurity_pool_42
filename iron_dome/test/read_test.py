@@ -2,13 +2,10 @@ import multiprocessing
 
 def read_large_file_in_chunks(filename, chunk_size=1024*1024, limit=1024*1024*10):  # Default limit is 10MB
    while True:
-        total_read = 0
-        f = open('./bigfile', 'rb')
-        while total_read < limit:
-            chunk = f.read(chunk_size)
-            total_read += len(chunk)
-            del chunk
-        print('One iter of bigfile read')
+        with open ("./bigfile", "rb") as f:
+            while (byte := f.read(chunk_size)):
+                del byte
+
 
 def spawn_readers(num_processes, filename='bigfile', chunk_size=1024*1024, limit=1024*1024*10):
     processes = []
