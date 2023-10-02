@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/fish
 
 shutdown() {
     echo "Killing crypto test..."
