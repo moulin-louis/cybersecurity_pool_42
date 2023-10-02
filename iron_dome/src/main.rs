@@ -1,3 +1,4 @@
+use std::process::Command;
 use std::{
     collections::HashMap,
     env,
@@ -23,22 +24,24 @@ use ctrlc::set_handler;
 use daemonize::Daemonize;
 use inline_colorization::{color_green, color_red, color_yellow};
 use sysinfo::{System, SystemExt};
-const LOG_DIR: &str = " /var/log/irondome/irondome.log";
-const LOG_DIR_ERR: &str = " /var/log/irondome/irondome_err.log";
+const LOG_DIR: &str = "/var/log/irondome/";
+const LOG_FILE: &str = "/var/log/irondome/irondome.log";
+// const LOG_FILE_ERR: &str = "/var/log/irondome/irondome_err.log";
 const TTS: Duration = Duration::from_secs(2);
 
 fn init_daemon() -> Option<()> {
-    let log_file: File = match File::create(LOG_DIR) {
+    Command::new("mkdir").arg("-p").arg(LOG_DIR);
+    let log_file: File = match File::create(LOG_FILE) {
         Ok(val) => val,
         Err(_) => {
-            eprintln!("{color_red}ERROR: Impossible to create: {}", LOG_DIR);
+            eprintln!("{color_red}ERROR: Impossible to create: {}", LOG_FILE);
             return None;
         }
     };
-    // let log_file_err: File = match File::create(LOG_DIR_ERR) {
+    // let log_file_err: File = match File::create(LOG_FILE_ERR) {
     //     Ok(val) => val,
     //     Err(_) => {
-    //         eprintln!("{color_red}ERROR: Impossible to create: {}", LOG_DIR_ERR);
+    //         eprintln!("{color_red}ERROR: Impossible to create: {}", LOG_FILE_ERR);
     //         return None;
     //     }
     // };
