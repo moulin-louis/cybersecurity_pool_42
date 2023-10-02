@@ -1,4 +1,4 @@
-#!/bin/fish
+#!/usr/bin/fish
 shutdown() {
     echo "Killing crypto test..."
     pkill -f crypto_test
