@@ -42,6 +42,6 @@ pub fn detect_disk_read_abuse(
         flags[1] = AtomicBool::new(false);
     }
     for (disk, read) in watcher {
-        println!("{}: {}/{} sector/bytes read", disk, read, read * 512);
+        println!("{}: {}/{} sector/bytes read", disk, read, *read * 512);
     }
 }
