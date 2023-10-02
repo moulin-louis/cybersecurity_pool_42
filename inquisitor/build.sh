@@ -1,0 +1,1 @@
+clang -o inquisitor -Wall -Wextra -Werror main.c
