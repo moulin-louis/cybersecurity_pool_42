@@ -15,7 +15,7 @@ shutdown() {
 echo 'Creating bigfile for testing...'
 if  [ ! -f "./bigfile" ]; then
     dd if=/dev/urandom of=bigfile bs=1G count=1
-fi
+;end
 echo 'Setup for SIGINT'
 trap shutdown SIGINT
 
