@@ -1,7 +1,8 @@
 use crate::watcher::Watcher;
 use std::{
     fs::{read_dir, ReadDir},
-    path::PathBuf, sync::{Arc, Mutex, atomic::AtomicBool, MutexGuard},
+    path::PathBuf,
+    sync::{atomic::AtomicBool, Arc, Mutex, MutexGuard},
 };
 
 fn updating_files_to_watch(watcher: &mut Watcher) {
@@ -40,21 +41,21 @@ fn updating_files_to_watch(watcher: &mut Watcher) {
     }
 }
 
-fn update_entropy_file_to_watch(watcher: &mut Watcher,  flag_arc: &mut Arc<Mutex<[AtomicBool; 3]>>) {
+fn update_entropy_file_to_watch(watcher: &mut Watcher, flag_arc: &mut Arc<Mutex<[AtomicBool; 3]>>) {
     let mut to_delete: Vec<PathBuf> = Vec::new();
     let mut found_file_sus: bool = false;
-     for (key, _val) in watcher.file_watched.clone() {
+    for (key, _val) in watcher.file_watched.clone() {
         match watcher.update_entropy(&key, flag_arc) {
             None => {
                 eprintln!("files_to_watch change, aborting current loop");
                 to_delete.push(key.clone());
                 break;
-            },
+            }
             Some(val) => {
                 if val == 2 {
                     found_file_sus = true;
                 }
-            },
+            }
         };
     }
     for file in to_delete {
@@ -62,7 +63,7 @@ fn update_entropy_file_to_watch(watcher: &mut Watcher,  flag_arc: &mut Arc<Mutex
     }
     if !found_file_sus {
         let mut flags: MutexGuard<'_, [AtomicBool; 3]> = flag_arc.lock().unwrap();
-        flags[1] = AtomicBool::new(false);
+        flags[0] = AtomicBool::new(false);
     }
 }
 
