@@ -23,6 +23,6 @@ echo 'Running crypto_test'
 ./crypto_test &
 echo 'Running read_test'
 python3 read_test.py &
-# echo 'Running entropy_test'
-# python3 entropy_test.py &
+echo 'Running entropy_test'
+bash entropy_test.sh &
 tail -f
