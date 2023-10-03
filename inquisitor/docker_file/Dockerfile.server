@@ -1,0 +1,11 @@
+FROM fauria/vsftpd
+
+RUN yum install -y wget\
+    && cd /etc/yum.repos.d/\
+    && wget https://download.opensuse.org/repositories/shells:fish:release:3/CentOS_8/shells:fish:release:3.repo\ 
+    && yum install -y --skip-broken fish
+
+ENV FTP_USER=user
+ENV FTP_PASS=1234
+
+EXPOSE 21

@@ -1,3 +1,2 @@
-clear
-CXXARGS='-Wall -Wextra -Werror -Weverything -Wno-declaration-after-statement'
-clang -o inquisitor $CXXARGS main.c
+CXXARGS='-Wall -Wextra -std=gnu99'
+gcc -o inquisitor $CXXARGS ./src/*.c

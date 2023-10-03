@@ -1,0 +1,10 @@
+# Use a base image with FTP client utilities
+FROM debian:latest
+
+# Install FTP client
+RUN apt-get update && \
+    apt-get install -y ftp fish iputils-ping tcpdump && \
+    apt-get clean
+
+# Set the working directory
+CMD ["tail", "-f"]

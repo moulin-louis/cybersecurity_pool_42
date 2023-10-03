@@ -1,0 +1,15 @@
+FROM debian:latest
+
+RUN apt-get update && \
+    apt-get install -y build-essential clang fish iputils-ping && \
+    apt-get clean
+
+WORKDIR /inquisitor
+
+COPY ../src ./src
+COPY ../inc ./inc
+COPY ../build.sh .
+
+# CMD ls -lRa
+
+CMD ./build.sh && ./inquisitor ${IP_1} ${MAC_1} ${IP_2} ${MAC_2}
