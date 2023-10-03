@@ -49,6 +49,8 @@ int send_fake_arp_packet_1(t_inquisitor* inquisitor) {
     hexdump(dst_mac, sizeof(dst_mac), 6);
 
     uchar src_mac[6] = {0};
+    dprintf(1, "HEXDUMP ifr_hwaddr\n");
+    hexdump(&inquisitor->ifr.ifr_hwaddr.sa_data, 6, 4);
     mac_str_to_hex(inquisitor->ifr.ifr_hwaddr.sa_data, src_mac);
     dprintf(1, "HEXDUMP SRC_MAC\n");
     hexdump(src_mac, sizeof(src_mac), 6);
