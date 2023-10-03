@@ -12,7 +12,11 @@
 #include <netinet/ip.h>
 #include <net/ethernet.h>
 #include <netpacket/packet.h>
+
 #define ARP_REPLY 0x0002
+#define FIRST_COMPUTER 1
+#define SECOND_COMPUTER 2
+
 typedef uint8_t     uchar;
 typedef uint16_t    ushort;
 typedef uint32_t    uint;
@@ -50,6 +54,11 @@ static void parse_args(args *arguments, char **av) {
     arguments->mac_target = av[4];
 }
 
+static int send_fake_arp_packet(args* arguments, int computer) {
+    (void)arguments;
+    (void)computer;
+    return (EXIT_SUCCESS);
+}
 
 int main(int ac, char **av) {
     if (ac != 5)
@@ -71,8 +80,10 @@ int main(int ac, char **av) {
     strncpy(ifr.ifr_name, "eth0", strlen("eth0") + 1);
     ioctl(sock, SIOCGIFINDEX, &ifr); // grab interface index
     ioctl(sock, SIOCGIFHWADDR, &ifr); //grab hardware address aka MAC
-    test_arp.hw_types
     test_arp.operation = htons(ARP_REPLY);
-    printf("%s\n", ifr.ifr_name);
+
+    send_fake_arp_packet(&arguments, FIRST_COMPUTER);
+    send_fake_arp_packet(&arguments, SECOND_COMPUTER);
+
     close(sock);
 }
