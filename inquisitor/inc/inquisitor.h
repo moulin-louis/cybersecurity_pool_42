@@ -27,6 +27,7 @@ typedef struct {
   int8_t mac_target_byte_arr[6];
   int32_t sock;
   struct ifreq ifr;
+  uint32_t index;
 } t_inquisitor;
 
 typedef struct {
