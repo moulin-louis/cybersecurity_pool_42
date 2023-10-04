@@ -11,11 +11,11 @@ void base_init_packet(t_packet *packet) {
 void fill_field_packet_1(t_inquisitor *inquisitor, t_packet *packet) {
   uint32_t int_addr;
   memcpy(packet->ar_sha, inquisitor->ifr.ifr_hwaddr.sa_data, 6); //my mac address
-  int_addr = inet_addr((const char *)inquisitor->ip_src);
+  int_addr = inet_addr((const char *) inquisitor->ip_src);
   memcpy(packet->ar_sip, &int_addr, 4); //src ip target
 
   memcpy(packet->ar_tha, inquisitor->mac_target_byte_arr, 6); //target mac address
-  int_addr = inet_addr((const char *)inquisitor->ip_target);
+  int_addr = inet_addr((const char *) inquisitor->ip_target);
   memcpy(packet->ar_tip, &int_addr, 4); //target ip address
 }
 
@@ -26,10 +26,10 @@ void init_ether_frame(ethernet_frame *frame, t_packet *packet) {
   frame->sfd = 0xD5;
   memcpy(frame->dest_addr, packet->ar_tha, 6);
   memcpy(frame->src_addr, packet->ar_sha, 6);
-  *(uint16_t *)frame->ethertype = 0x0806;
-  memcpy(frame->data, (uint8_t *)packet, sizeof(*packet));
+  *(uint16_t *) frame->ethertype = 0x0806;
+  memcpy(frame->data, (uint8_t *) packet, sizeof(*packet));
   memset(frame->data + sizeof(*packet), 0, 1500 - sizeof(*packet));
-  memset(frame->fcs, 0, 4 );
+  memset(frame->fcs, 0, 4);
 }
 
 int send_fake_arp_packet_1(t_inquisitor *inquisitor) {
@@ -56,7 +56,7 @@ int send_fake_arp_packet_1(t_inquisitor *inquisitor) {
   memcpy(dest_addr.sll_addr, packet.ar_tha, ETH_ALEN);
   dprintf(1, "HEXDUMP DEST_ADDR\n");
   hexdump(&dest_addr, sizeof(dest_addr), sizeof(dest_addr));
-  byte_sent = sendto(inquisitor->sock, &frame, sizeof(frame), 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+  byte_sent = sendto(inquisitor->sock, &frame, sizeof(frame), 0, (struct sockaddr *) &dest_addr, sizeof(dest_addr));
   if (byte_sent == -1) {
     dprintf(2, "sendto error: %s, file: %s, line: %d: \n", strerror(errno), __FILE__, __LINE__ - 2);
     return (EXIT_FAILURE);
