@@ -11,7 +11,7 @@ void init_inqui(t_inquisitor *inquisitor, char **av) {
     exit(EXIT_FAILURE);
   }
   inquisitor->ifr.ifr_addr.sa_family = AF_INET;
-  strncpy(inquisitor->ifr.ifr_name, "eth0", 7);
+  strncpy(inquisitor->ifr.ifr_name, "eth0", strlen("eth0") + 1);
   int retval = ioctl(inquisitor->sock, SIOCGIFADDR, &inquisitor->ifr);
   if (retval) {
     dprintf(2, "ioctl error: %s, file: %s, line: %d: \n", strerror(errno), __FILE__, __LINE__ - 2);

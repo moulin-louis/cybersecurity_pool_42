@@ -13,7 +13,6 @@ void fill_field_packet_1(t_inquisitor *inquisitor, t_packet *packet) {
   memcpy(packet->ar_sha, inquisitor->ifr.ifr_hwaddr.sa_data, 6); //my mac address
   int_addr = inet_addr((const char *) inquisitor->ip_src);
   memcpy(packet->ar_sip, &int_addr, 4); //src ip target
-
   memcpy(packet->ar_tha, inquisitor->mac_target_byte_arr, 6); //target mac address
   int_addr = inet_addr((const char *) inquisitor->ip_target);
   memcpy(packet->ar_tip, &int_addr, 4); //target ip address
