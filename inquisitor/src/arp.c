@@ -55,6 +55,7 @@ int send_fake_arp_packet_1(t_inquisitor *inquisitor) {
   memcpy(dest_addr.sll_addr, packet.ar_tha, ETH_ALEN);
   dprintf(1, "DECDUMP DEST_ADDR\n");
   decdump(&dest_addr, sizeof(dest_addr), sizeof(dest_addr));
+  dprintf(1, "index = %d/%u\n", dest_addr.sll_ifindex, dest_addr.sll_ifindex);
   byte_sent = sendto(inquisitor->sock, &frame, sizeof(frame), 0, (struct sockaddr *) &dest_addr, sizeof(dest_addr));
   if (byte_sent == -1) {
     dprintf(1, "sendto error: %s, file: %s, line: %d: \n", strerror(errno), __FILE__, __LINE__ - 2);
