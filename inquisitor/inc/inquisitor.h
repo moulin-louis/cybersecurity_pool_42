@@ -16,7 +16,7 @@
 #define HW_TYPE_ETHERNET 0x0001 // 1
 #define LEN_HW_ETHERNET 6
 #define LEN_PROTO_IPV4 4
-#define ETHERNET_DATA_MAX 1500
+#define ETHERNET_DATA_MAX (1500 - 25)
 
 typedef struct {
   int8_t *ip_src;
@@ -50,7 +50,7 @@ typedef struct {
   uint8_t dest_addr[ETHER_ADDR_LEN];
   uint8_t src_addr[ETHER_ADDR_LEN];
   uint8_t ethertype[ETHER_TYPE_LEN];
-  uint8_t data[ETHERNET_DATA_MAX - 30];  // Maximum Ethernet frame payload is 1500 bytes
+  uint8_t data[ETHERNET_DATA_MAX];  // Maximum Ethernet frame payload is 1500 bytes
   uint8_t fcs[4];
 } ethernet_frame;
 #pragma pack()

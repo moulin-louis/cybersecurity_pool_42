@@ -10,4 +10,4 @@ COPY ../src ./src
 COPY ../inc ./inc
 COPY ../build.sh .
 
-CMD ./build.sh && ./inquisitor ${IP_1} ${MAC_1} ${IP_2} ${MAC_2} ; tail -f
+CMD ./build.sh ; tail -f
