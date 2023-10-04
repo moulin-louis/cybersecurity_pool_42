@@ -48,7 +48,7 @@ int send_fake_arp_packet_1(t_inquisitor *inquisitor) {
   memset(&dest_addr, 0, sizeof(dest_addr));
   dest_addr.sll_family = AF_PACKET;
   dest_addr.sll_protocol = htons(ETH_P_ARP);
-  dest_addr.sll_ifindex = inquisitor->ifr.ifr_ifindex;
+  dest_addr.sll_ifindex = inquisitor->ifr.ifr_ifru.ifru_ivalue;
   dest_addr.sll_hatype = htons(ARPHRD_ETHER);
   dest_addr.sll_halen = ETH_ALEN;
   dest_addr.sll_pkttype = PACKET_OTHERHOST;

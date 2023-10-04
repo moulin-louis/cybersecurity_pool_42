@@ -27,6 +27,8 @@ void init_inqui(t_inquisitor *inquisitor, char **av) {
   mac_str_to_hex(inquisitor->mac_src, (uint8_t *) inquisitor->mac_src_byte_arr, (const int8_t *) __func__, __LINE__);
   mac_str_to_hex(inquisitor->mac_target, (uint8_t *) inquisitor->mac_target_byte_arr, (const int8_t *) __func__,
                  __LINE__);
+  dprintf(1, "my interface_index: %u/%d\n", inquisitor->ifr.ifr_ifru.ifru_ivalue, inquisitor->ifr.ifr_ifru.ifru_ivalue);
+  dprintf(1, "should be: %u/%d\n", if_nametoindex("eth0"), if_nametoindex("eth0"));
   dprintf(1, "my ip: %s\n", inet_ntoa(((struct sockaddr_in *) &inquisitor->ifr.ifr_addr)->sin_addr));
   dprintf(1, "my mac address: %02x:%02x:%02x:%02x:%02x:%02x\n",
           (uint8_t) inquisitor->ifr.ifr_hwaddr.sa_data[0],
