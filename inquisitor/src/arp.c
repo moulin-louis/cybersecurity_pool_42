@@ -53,11 +53,11 @@ int send_fake_arp_packet_1(t_inquisitor *inquisitor) {
   dest_addr.sll_halen = ETH_ALEN;
   dest_addr.sll_pkttype = PACKET_OTHERHOST;
   memcpy(dest_addr.sll_addr, packet.ar_tha, ETH_ALEN);
-  dprintf(1, "HEXDUMP DEST_ADDR\n");
-  hexdump(&dest_addr, sizeof(dest_addr), sizeof(dest_addr));
+//  dprintf(1, "HEXDUMP DEST_ADDR\n");
+//  hexdump(&dest_addr, sizeof(dest_addr), sizeof(dest_addr));
   byte_sent = sendto(inquisitor->sock, &frame, sizeof(frame), 0, (struct sockaddr *) &dest_addr, sizeof(dest_addr));
   if (byte_sent == -1) {
-    dprintf(2, "sendto error: %s, file: %s, line: %d: \n", strerror(errno), __FILE__, __LINE__ - 2);
+    dprintf(1, "sendto error: %s, file: %s, line: %d: \n", strerror(errno), __FILE__, __LINE__ - 2);
     return (EXIT_FAILURE);
   }
   dprintf(1, "byte_sent = %ld\n", byte_sent);
