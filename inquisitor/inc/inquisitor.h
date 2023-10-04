@@ -13,48 +13,55 @@
 #include <net/ethernet.h>
 #include <linux/if_packet.h>
 
-#define ARP_REQUEST 0x0001 // 1
-#define ARP_REPLY   0x0002 // 2
 #define HW_TYPE_ETHERNET 0x0001 // 1
-#define HW_TYPE_IEEE_802 0x0006 //6
 #define LEN_HW_ETHERNET 6
 #define LEN_PROTO_IPV4 4
-
-
-typedef uint8_t     uchar;
-typedef uint16_t    ushort;
-typedef uint32_t    uint;
+#define ETHERNET_DATA_MAX 1500
 
 typedef struct {
-    char    *ip_src;
-    char    *mac_src;
-    char    *ip_target;
-    char    *mac_target;
-    struct  ifreq ifr;
-    int     sock;
+  int8_t *ip_src;
+  int8_t *mac_src;
+  int8_t mac_src_byte_arr[6];
+  int8_t *ip_target;
+  int8_t *mac_target;
+  int8_t mac_target_byte_arr[6];
+  int32_t sock;
+  struct ifreq ifr;
 } t_inquisitor;
 
 typedef struct {
-    ushort  hw_types;
-    ushort  proto_types;
-    uchar   hw_addr_len;
-    uchar   proto_addr_len;
-    ushort  operation;
-    char    sender_hw_addr[6];
-    char    sender_proto_addr[4];
-    char    target_hw_addr[6];
-    char    target_proto_addr[4];
-} t_packet_arp;
+  uint16_t ar_hrd;    /* Format of hardware address.  */
+  uint16_t ar_pro;    /* Format of protocol address.  */
+  uint8_t ar_hln;    /* Length of hardware address.  */
+  uint8_t ar_pln;    /* Length of protocol address.  */
+  uint16_t ar_op;    /* ARP opcode (command).  */
 
+  uint8_t ar_sha[ETH_ALEN];  /* Sender hardware address.  */
+  uint8_t ar_sip[4];    /* Sender IP address.  */
+  uint8_t ar_tha[ETH_ALEN];  /* Target hardware address.  */
+  uint8_t ar_tip[4];    /* Target IP address.  */
+} t_packet;
+
+#pragma pack(1)
 typedef struct {
-    uchar   dst_mac[6];
-    uchar   src_mac[6];
-    ushort  type_len;
-    uchar   data[sizeof(t_packet_arp) + 1];
+  uint8_t preamble[7];
+  uint8_t sfd;
+  uint8_t dest_addr[ETHER_ADDR_LEN];
+  uint8_t src_addr[ETHER_ADDR_LEN];
+  uint8_t ethertype[ETHER_TYPE_LEN];
+  uint8_t data[ETHERNET_DATA_MAX];  // Maximum Ethernet frame payload is 1500 bytes
+  uint8_t fcs[4];
 } ethernet_frame;
+#pragma pack()
 
-void print_packet(const t_packet_arp *packet);
-void mac_str_to_hex(char *mac_addr, uchar *dest);
-int send_fake_arp_packet_1(t_inquisitor* inquisitor);
+void print_packet(const t_packet *packet);
+
+void mac_str_to_hex(int8_t *mac_addr, uint8_t *dest, const int8_t *caller, uint32_t line);
+
+int send_fake_arp_packet_1(t_inquisitor *inquisitor);
+
 void usage(void);
-void hexdump(void *data, size_t len, int row);
+
+void hexdump(void *data, size_t len, int32_t row);
+
+void decdump(void *data, size_t len, int32_t row);

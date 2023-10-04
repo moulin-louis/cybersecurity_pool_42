@@ -1,67 +1,66 @@
 #include "../inc/inquisitor.h"
 
-void base_init_packet(t_packet_arp *packet) {
-    packet->hw_types = htons(HW_TYPE_ETHERNET);
-    packet->proto_types  = htons(ETH_P_IP);
-    packet->hw_addr_len = LEN_HW_ETHERNET;
-    packet->proto_addr_len = LEN_PROTO_IPV4;
-    packet->operation = htons(ARP_REPLY);
+void base_init_packet(t_packet *packet) {
+  packet->ar_hrd = htons(HW_TYPE_ETHERNET);
+  packet->ar_pro = htons(ETH_P_IP);
+  packet->ar_hln = LEN_HW_ETHERNET;
+  packet->ar_pln = LEN_PROTO_IPV4;
+  packet->ar_op = htons(ARPOP_REPLY);
 }
 
-void fill_field_packet_1(t_inquisitor *inquisitor, t_packet_arp *packet) {
-    mac_str_to_hex(inquisitor->mac_src, (uchar *)packet->sender_hw_addr);
-    inet_pton(AF_INET, inet_ntoa(( (struct sockaddr_in *)&inquisitor->ifr.ifr_addr )->sin_addr), &packet->sender_proto_addr);
-    mac_str_to_hex(inquisitor->mac_target, (uchar *)packet->target_hw_addr);
-    inet_pton(AF_INET, inquisitor->ip_target, &packet->target_proto_addr);
+void fill_field_packet_1(t_inquisitor *inquisitor, t_packet *packet) {
+  uint32_t int_addr;
+  memcpy(packet->ar_sha, inquisitor->ifr.ifr_hwaddr.sa_data, 6); //my mac address
+  int_addr = inet_addr((const char *)inquisitor->ip_src);
+  memcpy(packet->ar_sip, &int_addr, 4); //src ip target
+
+  memcpy(packet->ar_tha, inquisitor->mac_target_byte_arr, 6); //target mac address
+  int_addr = inet_addr((const char *)inquisitor->ip_target);
+  memcpy(packet->ar_tip, &int_addr, 4); //target ip address
 }
 
-void create_ethernet_frame(ethernet_frame *frame,
-            const uchar *src_mac,
-            const uchar* dst_mac,
-            ushort type,
-            uchar *data,
-            size_t data_len) {
-    memcpy(frame->dst_mac, dst_mac, 6);
-    memcpy(frame->src_mac, src_mac, 6);
-    frame->type_len = htons(type);
-    memcpy(frame->data, data, data_len);
+void init_ether_frame(ethernet_frame *frame, t_packet *packet) {
+  memset(frame, 0, sizeof(*frame));
+  //init preamble and sfd to help with synchronization
+  memset(frame->preamble, 0xAA, 7);
+  frame->sfd = 0xD5;
+  memcpy(frame->dest_addr, packet->ar_tha, 6);
+  memcpy(frame->src_addr, packet->ar_sha, 6);
+  *(uint16_t *)frame->ethertype = 0x0806;
+  memcpy(frame->data, (uint8_t *)packet, sizeof(*packet));
+  memset(frame->data + sizeof(*packet), 0, 1500 - sizeof(*packet));
+  memset(frame->fcs, 0, 4 );
 }
 
-void create_ethernet_frame_arp(ethernet_frame *frame, uchar *src_mac, uchar *dst_mac, t_packet_arp *packet) {
-    uchar buff[sizeof(t_packet_arp)];
-    memcpy(buff, packet, sizeof(t_packet_arp)); //serialize arp packet
-    create_ethernet_frame(frame, src_mac, dst_mac, 0x0806, buff, sizeof(t_packet_arp));
-}
+int send_fake_arp_packet_1(t_inquisitor *inquisitor) {
+  t_packet packet;
+  ethernet_frame frame;
+  struct sockaddr_ll dest_addr;
+  ssize_t byte_sent;
 
-int send_fake_arp_packet_1(t_inquisitor* inquisitor) {
-    t_packet_arp packet;
-    ethernet_frame frame;
-    int byte_sent = 0;
-    
-    base_init_packet(&packet);
-    fill_field_packet_1(inquisitor, &packet);
-    print_packet(&packet);
-
-    uchar dst_mac[6];
-    memset(dst_mac, 0, sizeof(dst_mac));    
-    mac_str_to_hex(inquisitor->mac_target, dst_mac);
-    dprintf(1, "HEXDUMP DST_MAC\n");
-    hexdump(dst_mac, sizeof(dst_mac), 6);
-
-    uchar src_mac[6] = {0};
-    dprintf(1, "HEXDUMP ifr_hwaddr\n");
-    hexdump(&inquisitor->ifr.ifr_hwaddr.sa_data, 6, 4);
-    mac_str_to_hex(inquisitor->ifr.ifr_hwaddr.sa_data, src_mac);
-    dprintf(1, "HEXDUMP SRC_MAC\n");
-    hexdump(src_mac, sizeof(src_mac), 6);
-
-    // create_ethernet_frame_arp(&frame, dst_mac, mac, &packet);
-    dprintf(1, "HEXDUMP ETHERNET_FRAME:\n");
-    hexdump(&frame, sizeof(frame), 4);
-    // byte_sent = sendto(inquisitor->sock, &frame, sizeof(ethernet_frame), 0, (struct sockaddr *)&sa, sizeof(sa));
-    if (byte_sent == -1) {
-        dprintf(2, "sendto error: %s, file: %s, line: %d: \n",  strerror(errno), __FILE__, __LINE__ - 2);
-    }
-    dprintf(1, "byte_sent = %d\n", byte_sent);
-    return (EXIT_SUCCESS);
+  base_init_packet(&packet);
+  fill_field_packet_1(inquisitor, &packet);
+//  dprintf(1, "HEXDUMP ARP_PACKET\n");
+//  hexdump(&packet, sizeof(packet), sizeof(packet));
+//  print_packet(&packet);
+  init_ether_frame(&frame, &packet);
+//  dprintf(1, "HEXDUMP ETHERNET FRAME\n");
+//  hexdump(&frame, sizeof(frame), sizeof(frame));
+  memset(&dest_addr, 0, sizeof(dest_addr));
+  dest_addr.sll_family = AF_PACKET;
+  dest_addr.sll_protocol = htons(ETH_P_ARP);
+  dest_addr.sll_ifindex = inquisitor->ifr.ifr_ifindex;
+  dest_addr.sll_hatype = htons(ARPHRD_ETHER);
+  dest_addr.sll_halen = ETH_ALEN;
+  dest_addr.sll_pkttype = PACKET_OTHERHOST;
+  memcpy(dest_addr.sll_addr, packet.ar_tha, ETH_ALEN);
+  dprintf(1, "HEXDUMP DEST_ADDR\n");
+  hexdump(&dest_addr, sizeof(dest_addr), sizeof(dest_addr));
+  byte_sent = sendto(inquisitor->sock, &frame, sizeof(frame), 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+  if (byte_sent == -1) {
+    dprintf(2, "sendto error: %s, file: %s, line: %d: \n", strerror(errno), __FILE__, __LINE__ - 2);
+    return (EXIT_FAILURE);
+  }
+  dprintf(1, "byte_sent = %ld\n", byte_sent);
+  return (EXIT_SUCCESS);
 }

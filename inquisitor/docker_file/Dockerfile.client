@@ -3,7 +3,7 @@ FROM debian:latest
 
 # Install FTP client
 RUN apt-get update && \
-    apt-get install -y ftp fish iputils-ping tcpdump && \
+    apt-get install -y ftp fish iputils-ping tcpdump net-tools && \
     apt-get clean
 
 # Set the working directory
