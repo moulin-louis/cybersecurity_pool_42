@@ -1,4 +1,0 @@
-/sgoinfre/goinfre/Perso/loumouli/clion/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/sgoinfre/goinfre/Perso/loumouli/clion/bin/ninja/linux/x64/ninja -G Ninja -S /mnt/nfs/homes/loumouli/cybersecurity_pool_42/inquisitor -B /mnt/nfs/homes/loumouli/cybersecurity_pool_42/inquisitor/cmake-build-debug
--- Configuring done (1.8s)
--- Generating done (0.0s)
--- Build files have been written to: /mnt/nfs/homes/loumouli/cybersecurity_pool_42/inquisitor/cmake-build-debug
