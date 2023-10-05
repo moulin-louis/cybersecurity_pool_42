@@ -1,0 +1,1 @@
+./inquisitor $IP_SRC $MAC_SRC $IP_TARGET $MAC_TARGET

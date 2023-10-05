@@ -1,0 +1,3 @@
+/mnt/nfs/homes/loumouli/cybersecurity_pool_42/inquisitor/cmake-build-debug/CMakeFiles/inquisitor.dir
+/mnt/nfs/homes/loumouli/cybersecurity_pool_42/inquisitor/cmake-build-debug/CMakeFiles/edit_cache.dir
+/mnt/nfs/homes/loumouli/cybersecurity_pool_42/inquisitor/cmake-build-debug/CMakeFiles/rebuild_cache.dir

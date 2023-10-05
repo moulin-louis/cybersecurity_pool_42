@@ -9,10 +9,10 @@ services:
       dockerfile: ./docker_file/Dockerfile.server
     ports:
       - "8787:21"
-    mac_address: ${MAC_1}
+    mac_address: ${MAC_SRC}
     networks:
       app_net:
-        ipv4_address: ${IP_1}
+        ipv4_address: ${IP_SRC}
 
   ftp_client:
     env_file: .env
@@ -20,24 +20,30 @@ services:
     build:
       context: .
       dockerfile: ./docker_file/Dockerfile.client
-    mac_address: ${MAC_2}
+    mac_address: ${MAC_TARGET}
     networks:
       app_net:
-        ipv4_address: ${IP_2}
+        ipv4_address: ${IP_TARGET}
 
   inquisitor:
     env_file: .env
     container_name: "inquisitor"
+    privileged: true
     build:
       context: .
       dockerfile: ./docker_file/Dockerfile.inquisitor
     mac_address: "02:42:ac:11:00:04"
+    sysctls:
+      - net.ipv4.ip_forward=0
+    cap_add:
+      - NET_ADMIN
     networks:
       app_net:
         ipv4_address: 172.16.238.30
 
 networks:
   app_net:
+    driver: bridge
     ipam:
       config:
         - subnet: 172.16.238.0/24

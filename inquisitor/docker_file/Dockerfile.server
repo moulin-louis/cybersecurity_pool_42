@@ -1,11 +1,18 @@
-FROM fauria/vsftpd
+# Use the Debian base image
+FROM debian:bullseye-slim
 
-RUN yum install -y wget\
-    && cd /etc/yum.repos.d/\
-    && wget https://download.opensuse.org/repositories/shells:fish:release:3/CentOS_8/shells:fish:release:3.repo\ 
-    && yum install -y --skip-broken fish
+# Update the system and install vsftpd
+RUN apt-get update && apt-get install -y vsftpd fish tcpdump net-tools iputils-ping
 
-ENV FTP_USER=user
-ENV FTP_PASS=1234
+RUN useradd -m ftpuser && echo "ftpuser:1234" | chpasswd
 
+# Copy a vsftpd configuration file into the container
+COPY vsftpd.conf /etc/vsftpd/
+
+RUN mkdir -p /var/ftp && mkdir -p /var/run/vsftpd/empty
+
+# Expose the FTP port
 EXPOSE 21
+
+# Run vsftpd in the foreground
+CMD ["vsftpd", "/etc/vsftpd.conf"]

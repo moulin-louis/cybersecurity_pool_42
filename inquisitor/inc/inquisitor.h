@@ -16,7 +16,8 @@
 #define HW_TYPE_ETHERNET 0x0001 // 1
 #define LEN_HW_ETHERNET 6
 #define LEN_PROTO_IPV4 4
-#define ETHERNET_DATA_MAX (1500 - 25)
+
+extern int g_sock;
 
 typedef struct {
   int8_t *ip_src;
@@ -30,6 +31,7 @@ typedef struct {
   uint32_t index;
 } t_inquisitor;
 
+#pragma pack(1)
 typedef struct {
   uint16_t ar_hrd;    /* Format of hardware address.  */
   uint16_t ar_pro;    /* Format of protocol address.  */
@@ -42,27 +44,30 @@ typedef struct {
   uint8_t ar_tha[ETH_ALEN];  /* Target hardware address.  */
   uint8_t ar_tip[4];    /* Target IP address.  */
 } t_packet;
+#pragma pack()
 
 #pragma pack(1)
 typedef struct {
-  uint8_t preamble[7];
-  uint8_t sfd;
   uint8_t dest_addr[ETHER_ADDR_LEN];
   uint8_t src_addr[ETHER_ADDR_LEN];
   uint8_t ethertype[ETHER_TYPE_LEN];
-  uint8_t data[ETHERNET_DATA_MAX];  // Maximum Ethernet frame payload is 1500 bytes
+  uint8_t data[sizeof(t_packet)];  // Maximum Ethernet frame payload is 1500 bytes
   uint8_t fcs[4];
 } ethernet_frame;
 #pragma pack()
 
 void print_packet(const t_packet *packet);
 
-void mac_str_to_hex(int8_t *mac_addr, uint8_t *dest, const int8_t *caller, uint32_t line);
+void mac_str_to_hex(int8_t *mac_addr, uint8_t *dest);
 
-int send_fake_arp_packet_1(t_inquisitor *inquisitor);
+void send_fake_arp_packet(t_inquisitor *inquisitor, uint32_t packet_nbr);
 
 void usage(void);
 
-void hexdump(void *data, size_t len, int32_t row);
+void error(const char *func_error, const char *error_msg, const char *file, int line, const char *func_caller);
 
-void decdump(void *data, size_t len, int32_t row);
+void hexdump(void *data, size_t len, uint32_t row);
+
+void decdump(void *data, size_t len, uint32_t row);
+
+void asciidump(void *data, size_t len, uint32_t row);
