@@ -3,27 +3,29 @@ version: '3.1'
 services:
   ftp_server:
     env_file: .env
+    privileged: true
     container_name: "ftp_server"
     build:
       context: .
       dockerfile: ./docker_file/Dockerfile.server
     ports:
       - "8787:21"
-    mac_address: ${MAC_SRC}
+    mac_address: 02:42:ac:11:00:02
     networks:
       app_net:
-        ipv4_address: ${IP_SRC}
+        ipv4_address: 172.16.238.10
 
   ftp_client:
     env_file: .env
+    privileged: true
     container_name: "ftp_client"
     build:
       context: .
       dockerfile: ./docker_file/Dockerfile.client
-    mac_address: ${MAC_TARGET}
+    mac_address: 02:42:ac:11:00:03
     networks:
       app_net:
-        ipv4_address: ${IP_TARGET}
+        ipv4_address: 172.16.238.20
 
   inquisitor:
     env_file: .env
