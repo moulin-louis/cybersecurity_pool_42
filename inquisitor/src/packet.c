@@ -31,7 +31,7 @@ void transmit_packet(t_inquisitor *inquisitor, ethernet_frame *frame, uint32_t d
   ssize_t retval = sendto(inquisitor->sock, frame, sizeof(*frame), 0, (struct sockaddr *)&dest_addr, sizeof (dest_addr));
   if (retval == -1)
     error("sendto", NULL, __FILE__, __LINE__, __func__);
-  dprintf(1, GREEN "%ld bytes transmited to ", retval);
+  dprintf(1, GREEN "LOG: %ld: %ld bytes transmited to ", gettime(), retval);
   dprintf(1, "%02x:%02x:%02x:%02x:%02x:%02x\n" RESET,
           (uint8_t) frame->dest_addr[0],
           (uint8_t) frame->dest_addr[1],

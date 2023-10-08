@@ -5,8 +5,7 @@ __attribute__ ((noreturn)) void usage(void) {
   exit(EXIT_FAILURE);
 }
 
-__attribute__ ((noreturn)) void
-error(const char *func_error, const char *error_msg, const char *file, int line, const char *func_caller) {
+__attribute__ ((noreturn)) void error(const char *func_error, const char *error_msg, const char *file, int line, const char *func_caller) {
   char errno_tmp = errno;
   dprintf(2, RED "ERROR: %s error: %s, caller: %s, file: %s, line: %d" RESET, func_error,
           error_msg ? error_msg : strerror(errno), func_caller, file, line);
@@ -121,4 +120,10 @@ void mac_str_to_hex(int8_t *mac_addr, uint8_t *dest) {
                    &dest[4], &dest[5]);
   if (ret != 6)
     error("mac_str_to_hex", "failed parsing mac address to byte array", __FILE__, __LINE__, __func__);
+}
+
+time_t	gettime(void) {
+    struct timeval	tv;
+    gettimeofday(&tv, NULL);
+    return (((tv.tv_sec * 1000) + (tv.tv_usec / 1000)) - init_time);
 }

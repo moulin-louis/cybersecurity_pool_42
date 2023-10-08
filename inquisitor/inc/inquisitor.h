@@ -12,6 +12,7 @@
 #include <netinet/ip.h>
 #include <net/ethernet.h>
 #include <linux/if_packet.h>
+#include <sys/time.h>
 
 #define HW_TYPE_ETHERNET 0x0001 // 1
 #define LEN_HW_ETHERNET 6
@@ -20,6 +21,7 @@
 #define ETHERNET_MAX_LEN (1500 - ETHER_ADDR_LEN - ETHER_ADDR_LEN - ETHER_TYPE_LEN - FCS_LEN - 150)
 
 extern int g_sock;
+extern time_t init_time;
 
 typedef struct {
   int8_t *ip_src;
@@ -71,6 +73,7 @@ void send_fake_arp_packet(t_inquisitor *inquisitor, uint32_t dest);
 void read_packet(ethernet_frame *packet, uint16_t ethertype);
 void handle_packet(t_inquisitor *inquisitor, ethernet_frame *frame, uint16_t ethertype);
 void usage(void);
+time_t	gettime(void);
 void error(const char *func_error, const char *error_msg, const char *file, int line, const char *func_caller);
 void hexdump(void *data, size_t len, int32_t row);
 void decdump(void *data, size_t len, int32_t row);

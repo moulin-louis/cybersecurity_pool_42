@@ -10,6 +10,7 @@ COPY ../run.sh .
 COPY ../src ./src
 
 CMD arptables -A INPUT --source-mac 02:42:ac:11:00:02 -j DROP\
-&& arptables -A INPUT --source-mac 02:42:ac:11:00:03 -j DROP\
-&& arptables -A INPUT --source-mac ff:ff:ff:ff:ff:ff -j DROP\
-&& cmake -S . -B build && cmake --build build && mv ./build/inquisitor .; tail -f
+        ; arptables -A INPUT --source-mac 02:42:ac:11:00:03 -j DROP\
+        ; arptables -A INPUT --source-mac ff:ff:ff:ff:ff:ff -j DROP\
+        ; cmake -S . -B build && cmake --build build && mv ./build/inquisitor .\
+        ; tail -f

@@ -2,6 +2,7 @@
 #include "../inc/inquisitor.h"
 
 int g_sock = 0;
+time_t init_time = 0;
 
 void init_inqui(t_inquisitor *inquisitor, char **av) {
   inquisitor->ip_src = (int8_t *) av[1];
@@ -45,7 +46,6 @@ void print_info(char **av, t_inquisitor *inquisitor) {
   dprintf(1, RESET);
 }
 
-
 int main(int ac, char **av) {
   t_inquisitor inquisitor;
 
@@ -59,6 +59,7 @@ int main(int ac, char **av) {
   const struct ifreq ifr = {
       .ifr_name = "eth0",
   };
+  init_time = gettime();
   if (setsockopt(inquisitor.sock, SOL_SOCKET, SO_BINDTODEVICE, &ifr, sizeof(ifr)) < 0)
     error("setsockopt", NULL, __FILE__, __LINE__, __func__);
   while (1) {
@@ -70,9 +71,10 @@ int main(int ac, char **av) {
       error("recv", NULL, __FILE__, __LINE__, __func__);
     if (retval == 0)
       break;
-    uint16_t ethertype = ntohs(*(uint16_t *) (buf + 12));
-    ethernet_frame *packet_recv = (ethernet_frame *)buf;
-    dprintf(1, "Received packet from %02x:%02x:%02x:%02x:%02x:%02x\n",
+    uint16_t ethertype = ntohs(*(uint16_t * )(buf + 12));
+    ethernet_frame *packet_recv = (ethernet_frame *) buf;
+    dprintf(1, GREEN "LOG: %ld: received packet from %02x:%02x:%02x:%02x:%02x:%02x\n" RESET,
+            gettime(),
             packet_recv->src_addr[0],
             packet_recv->src_addr[1],
             packet_recv->src_addr[2],
