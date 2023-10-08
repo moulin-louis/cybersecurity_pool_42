@@ -2,7 +2,7 @@
 FROM debian:bullseye-slim
 
 # Update the system and install vsftpd
-RUN apt-get update && apt-get install -y vsftpd fish tcpdump net-tools iputils-ping
+RUN apt-get update && apt-get install -y vsftpd fish tcpdump net-tools iputils-ping iproute2
 
 RUN useradd -m ftpuser && echo "ftpuser:1234" | chpasswd
 

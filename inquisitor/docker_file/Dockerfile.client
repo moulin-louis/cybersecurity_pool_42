@@ -2,7 +2,7 @@
 FROM debian:latest
 
 # Install FTP client
-RUN apt update && apt install -y ftp fish iputils-ping tcpdump net-tools
+RUN apt update && apt install -y ftp fish iputils-ping tcpdump net-tools iproute2
 
 #CMD ping -c 1 172.16.238.10 && ping -c 1 172.16.238.30 && tail -f
 CMD tail -f

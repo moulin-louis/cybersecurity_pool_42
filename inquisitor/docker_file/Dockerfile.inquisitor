@@ -1,16 +1,16 @@
 FROM debian:latest
 
-RUN apt-get update && apt-get install -y build-essential fish iputils-ping net-tools tcpdump iptables arptables cmake
+RUN apt-get update && apt-get install -y build-essential fish iputils-ping net-tools tcpdump iptables arptables cmake valgrind iproute2 python3-scapy
 
 WORKDIR /inquisitor
 
 COPY ../inc ./inc
 COPY ../CMakeLists.txt .
 COPY ../run.sh .
+COPY ../monitor.py .
 COPY ../src ./src
+RUN cmake -S . -B build && cmake --build build && mv ./build/inquisitor .
 
-CMD arptables -A INPUT --source-mac 02:42:ac:11:00:02 -j DROP\
-        ; arptables -A INPUT --source-mac 02:42:ac:11:00:03 -j DROP\
-        ; arptables -A INPUT --source-mac ff:ff:ff:ff:ff:ff -j DROP\
-        ; cmake -S . -B build && cmake --build build && mv ./build/inquisitor .\
-        ; tail -f
+CMD tail -f
+
+#CMD arptables -A INPUT --source-mac 02:42:ac:11:00:02 -j DROP; arptables -A INPUT --source-mac 02:42:ac:11:00:03 -j DROP; arptables -A INPUT --source-mac ff:ff:ff:ff:ff:ff -j DROP; tail -f
