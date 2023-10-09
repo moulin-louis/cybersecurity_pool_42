@@ -53,14 +53,12 @@ dprintf(1, YELLOW "WARNING: SIGINT: %d received, aborting the attack...\n" RESET
 int main(int ac, char **av) {
   t_inquisitor inquisitor;
 
-
   if (ac != 5)
     usage();
   signal(SIGINT, handler_sigint);
   init_time = gettime();
   init_inqui(&inquisitor, av);
   print_info(av, &inquisitor);
-
   while (status_loop) {
     send_fake_arp_packet(&inquisitor, 1); // alter target arp tables
     send_fake_arp_packet(&inquisitor, 2); // alter source arp tables

@@ -1,4 +1,3 @@
-# Use a base image with FTP client utilities
 FROM debian:latest
 
 # Install FTP client

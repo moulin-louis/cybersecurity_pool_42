@@ -1,18 +1,12 @@
-# Use the Debian base image
-FROM debian:bullseye-slim
+FROM debian:latest
 
-# Update the system and install vsftpd
-RUN apt-get update && apt-get install -y vsftpd fish tcpdump net-tools iputils-ping iproute2
+RUN apt-get update && apt-get install -y fish tcpdump net-tools iputils-ping iproute2
 
 RUN useradd -m ftpuser && echo "ftpuser:1234" | chpasswd
 
-# Copy a vsftpd configuration file into the container
 COPY vsftpd.conf /etc/vsftpd/
 
 RUN mkdir -p /var/ftp && mkdir -p /var/run/vsftpd/empty
 
-# Expose the FTP port
-EXPOSE 21
-
-# Run vsftpd in the foreground
-CMD ["vsftpd", "/etc/vsftpd.conf"]
+#CMD ["vsftpd", "/etc/vsftpd.conf"]
+CMD tail -f
