@@ -11,6 +11,8 @@ services:
     ports:
       - "8787:21"
     mac_address: 02:42:ac:11:00:02
+    cap_add:
+      - NET_ADMIN
     networks:
       app_net:
         ipv4_address: 172.16.238.10
@@ -23,6 +25,8 @@ services:
       context: .
       dockerfile: ./docker_file/Dockerfile.client
     mac_address: 02:42:ac:11:00:03
+    cap_add:
+      - NET_ADMIN
     networks:
       app_net:
         ipv4_address: 172.16.238.20
@@ -35,8 +39,6 @@ services:
       context: .
       dockerfile: ./docker_file/Dockerfile.inquisitor
     mac_address: "02:42:ac:11:00:04"
-    sysctls:
-      - net.ipv4.ip_forward=0
     cap_add:
       - NET_ADMIN
     networks:

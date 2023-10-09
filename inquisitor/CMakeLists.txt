@@ -10,5 +10,4 @@ add_executable(
         inquisitor
         src/arp.c
         src/main.c
-        src/utils.c
-        src/packet.c)
+        src/utils.c)

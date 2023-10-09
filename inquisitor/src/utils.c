@@ -9,12 +9,10 @@ __attribute__ ((noreturn)) void error(const char *func_error, const char *error_
   char errno_tmp = errno;
   dprintf(2, RED "ERROR: %s error: %s, caller: %s, file: %s, line: %d" RESET, func_error,
           error_msg ? error_msg : strerror(errno), func_caller, file, line);
-  if (g_sock)
-    close(g_sock);
   exit(errno_tmp);
 }
 
-void hexdump(void *data, size_t len, int32_t row) {
+__attribute__((unused)) void hexdump(void *data, size_t len, int32_t row) {
   if (row == 0) {
     for (size_t i = 0; i < len; i++)
       dprintf(1, "%02x ", ((uint8_t *) data)[i]);
@@ -32,7 +30,7 @@ void hexdump(void *data, size_t len, int32_t row) {
   dprintf(1, "\n");
 }
 
-void asciidump(void *data, size_t len, int32_t row) {
+__attribute__((unused)) void asciidump(void *data, size_t len, int32_t row) {
   if (!row) {
     for (size_t i = 0; i < len; i++) {
       if (!isprint(((uint8_t *) data)[i]))
@@ -57,7 +55,7 @@ void asciidump(void *data, size_t len, int32_t row) {
   dprintf(1, "\n");
 }
 
-void decdump(void *data, size_t len, int32_t row) {
+__attribute__((unused)) void decdump(void *data, size_t len, int32_t row) {
   if (row == 0) {
     for (size_t i = 0; i < len; i++)
       dprintf(1, "%02d ", ((uint8_t *) data)[i]);
@@ -75,7 +73,7 @@ void decdump(void *data, size_t len, int32_t row) {
   dprintf(1, "\n");
 }
 
-void print_packet(const t_packet *packet) {
+__attribute__((unused)) void print_packet(const t_packet *packet) {
   dprintf(1, GREEN);
   dprintf(1, "LOG: ARP Packet:\n");
   dprintf(1, "LOG: Hardware Type: 0x%04x\n", ntohs(packet->ar_hrd));

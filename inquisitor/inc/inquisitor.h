@@ -18,9 +18,7 @@
 #define LEN_HW_ETHERNET 6
 #define LEN_PROTO_IPV4 4
 #define FCS_LEN 4
-#define ETHERNET_MAX_LEN (1500 - ETHER_ADDR_LEN - ETHER_ADDR_LEN - ETHER_TYPE_LEN - FCS_LEN - 150)
 
-extern int g_sock;
 extern time_t init_time;
 
 typedef struct {
@@ -55,7 +53,7 @@ typedef struct {
   uint8_t dest_addr[ETHER_ADDR_LEN];
   uint8_t src_addr[ETHER_ADDR_LEN];
   uint8_t ethertype[ETHER_TYPE_LEN];
-  uint8_t data[ETHERNET_MAX_LEN];
+  uint8_t data[sizeof(t_packet) + 3];
   uint8_t fcs[FCS_LEN];
 } ethernet_frame;
 typedef struct addr_t addr_t;
@@ -70,11 +68,13 @@ typedef struct addr_t addr_t;
 //void print_packet(const t_packet *packet);
 void mac_str_to_hex(int8_t *mac_addr, uint8_t *dest);
 void send_fake_arp_packet(t_inquisitor *inquisitor, uint32_t dest);
-//void read_packet(ethernet_frame *packet, uint16_t ethertype);
-void handle_packet(t_inquisitor *inquisitor, ethernet_frame *frame, ssize_t len_packet);
 void usage(void);
 time_t	gettime(void);
 void error(const char *func_error, const char *error_msg, const char *file, int line, const char *func_caller);
-void hexdump(void *data, size_t len, int32_t row);
-void decdump(void *data, size_t len, int32_t row);
-void asciidump(void *data, size_t len, int32_t row);
+void restore_arp_tables(t_inquisitor *inquisitor, uint32_t dest);
+
+__attribute__((unused)) void hexdump(void *data, size_t len, int32_t row);
+
+__attribute__((unused)) void decdump(void *data, size_t len, int32_t row);
+
+__attribute__((unused)) void asciidump(void *data, size_t len, int32_t row);

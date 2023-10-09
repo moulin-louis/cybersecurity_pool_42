@@ -1,6 +1,6 @@
 FROM debian:latest
 
-RUN apt-get update && apt-get install -y build-essential fish iputils-ping net-tools tcpdump iptables arptables cmake valgrind iproute2 python3-scapy
+RUN apt-get update && apt-get install -y build-essential fish iputils-ping net-tools tcpdump cmake valgrind iproute2 python3-scapy
 
 WORKDIR /inquisitor
 

