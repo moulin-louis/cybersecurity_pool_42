@@ -12,7 +12,7 @@ def packet_callback(packet_recv):
 
 
 if __name__ == "__main__":
-
+    print('running spoofer')
     IP_SERVER, MAC_SERVER, IP_CLIENT, MAC_CLIENT = os.getenv('IP_SRC'), os.getenv('MAC_SRC'), os.getenv(
         'IP_TARGET'), os.getenv('MAC_TARGET')
     sniff(prn=packet_callback, store=0)
