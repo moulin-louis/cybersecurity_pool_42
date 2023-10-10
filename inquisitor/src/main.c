@@ -1,3 +1,4 @@
+#include <fcntl.h>
 #include "../inc/inquisitor.h"
 
 time_t init_time = 0;
@@ -27,6 +28,7 @@ void init_inqui(t_inquisitor *inquisitor, char **av) {
 }
 
 void print_info(char **av, t_inquisitor *inquisitor) {
+
   dprintf(1, GREEN);
   dprintf(1, "LOG: BASE INFO:\n");
   dprintf(1, "LOG: MAC_SRC: %s\n", av[2]);
@@ -52,9 +54,14 @@ dprintf(1, YELLOW "WARNING: SIGINT: %d received, aborting the attack...\n" RESET
 
 int main(int ac, char **av) {
   t_inquisitor inquisitor;
-
+  int fd = 0;
   if (ac != 5)
     usage();
+  fd = open("./log", O_CREAT | O_RDWR);
+  if (fd == -1)
+    error("open", NULL, __FILE__, __LINE__, __func__);
+  if (dup2(1, fd) == -1)
+    error("dup2", NULL, __FILE__, __LINE__, __func__);
   signal(SIGINT, handler_sigint);
   init_time = gettime();
   init_inqui(&inquisitor, av);

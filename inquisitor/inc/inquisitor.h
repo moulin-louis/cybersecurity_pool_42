@@ -53,8 +53,7 @@ typedef struct {
   uint8_t dest_addr[ETHER_ADDR_LEN];
   uint8_t src_addr[ETHER_ADDR_LEN];
   uint8_t ethertype[ETHER_TYPE_LEN];
-  uint8_t data[sizeof(t_packet) + 3];
-  uint8_t fcs[FCS_LEN];
+  uint8_t data[sizeof(t_packet)];
 } ethernet_frame;
 typedef struct addr_t addr_t;
 #pragma pack()

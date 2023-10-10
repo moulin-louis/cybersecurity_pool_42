@@ -9,15 +9,15 @@ void base_init_packet(t_packet *packet) {
   packet->ar_op = htons(ARPOP_REPLY);
 }
 
-void fill_field_packet(t_inquisitor *inquisitor, t_packet *packet, const int8_t *ip_src, const int8_t *ip_target,
-                       const int8_t *mac_target) {
-  uint32_t int_addr;
-  memcpy(packet->ar_sha, inquisitor->ifr.ifr_hwaddr.sa_data, 6); //my mac address
-  int_addr = inet_addr((const char *) ip_src);
-  memcpy(packet->ar_sip, &int_addr, 4); //src ip target
-  memcpy(packet->ar_tha, mac_target, 6); //target mac address
-  int_addr = inet_addr((const char *) ip_target);
-  memcpy(packet->ar_tip, &int_addr, 4); //target ip address
+void fill_field_packet(t_inquisitor *inquisitor, t_packet *packet, const int8_t *source_ip, const int8_t *target_ip, const int8_t *target_mac) {
+  uint32_t tmp_int;
+  char *source_mac = inquisitor->ifr.ifr_hwaddr.sa_data;
+  memcpy(packet->ar_sha, source_mac, 6); //my mac address
+  tmp_int = inet_addr((const char *) source_ip);
+  memcpy(packet->ar_sip, &tmp_int, 4); //src ip target
+  memcpy(packet->ar_tha, target_mac, 6); //target mac address
+  tmp_int = inet_addr((const char *) target_ip);
+  memcpy(packet->ar_tip, &tmp_int, 4); //target ip address
 }
 
 void init_ether_frame(ethernet_frame *frame, t_packet *packet) {
@@ -46,17 +46,10 @@ void send_fake_arp_packet(t_inquisitor *inquisitor, uint32_t dest) {
   ssize_t byte_sent;
 
   base_init_packet(&packet);
-  switch (dest) {
-    case 1:
-      fill_field_packet(inquisitor, &packet, inquisitor->ip_src, inquisitor->ip_target,inquisitor->mac_target_byte_arr);
-      break;
-    case 2:
-      fill_field_packet(inquisitor, &packet, inquisitor->ip_target, inquisitor->ip_src, inquisitor->mac_src_byte_arr);
-      break;
-    default:
-      dprintf(2, YELLOW "WARNING: Error packet_nbr %s" RESET, __func__);
-      exit(EXIT_FAILURE);
-  }
+  if (dest == 1)
+    fill_field_packet(inquisitor, &packet, inquisitor->ip_src, inquisitor->ip_target,inquisitor->mac_target_byte_arr);
+  else if (dest == 2)
+    fill_field_packet(inquisitor, &packet, inquisitor->ip_target, inquisitor->ip_src, inquisitor->mac_src_byte_arr);
   init_ether_frame(&frame, &packet);
   init_dest_sock(&dest_addr, inquisitor);
   dest_addr.sll_pkttype = PACKET_OUTGOING;
@@ -74,18 +67,12 @@ void restore_arp_tables(t_inquisitor *inquisitor, uint32_t dest) {
   ssize_t byte_sent;
 
   base_init_packet(&packet);
-  switch (dest) {
-    case 1:
-      fill_field_packet(inquisitor, &packet, inquisitor->ip_src, inquisitor->ip_target, inquisitor->mac_target_byte_arr);
-      memcpy(packet.ar_sha, inquisitor->mac_src_byte_arr, 6);
-      break;
-    case 2:
-      fill_field_packet(inquisitor, &packet, inquisitor->ip_target, inquisitor->ip_src, inquisitor->mac_src_byte_arr);
-      memcpy(packet.ar_sha, inquisitor->mac_target_byte_arr, 6);
-      break;
-    default:
-      dprintf(2, YELLOW "WARNING: Error dest nbr %s" RESET, __func__);
-      exit(EXIT_FAILURE);
+  if (dest == 1) {
+    fill_field_packet(inquisitor, &packet, inquisitor->ip_src, inquisitor->ip_target, inquisitor->mac_target_byte_arr);
+    memcpy(packet.ar_sha, inquisitor->mac_src_byte_arr, 6);
+  } else if (dest == 2) {
+    fill_field_packet(inquisitor, &packet, inquisitor->ip_target, inquisitor->ip_src, inquisitor->mac_src_byte_arr);
+    memcpy(packet.ar_sha, inquisitor->mac_target_byte_arr, 6);
   }
   init_ether_frame(&frame, &packet);
   init_dest_sock(&dest_addr, inquisitor);
