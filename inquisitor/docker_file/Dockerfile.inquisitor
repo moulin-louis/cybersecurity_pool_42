@@ -1,6 +1,6 @@
 FROM debian:latest
 
-RUN apt-get update && apt-get install -y build-essential fish iputils-ping net-tools tcpdump cmake valgrind iproute2 python3-scapy
+RUN apt update && apt install -y build-essential fish cmake python3-scapy
 
 WORKDIR /inquisitor
 
@@ -12,5 +12,3 @@ COPY ../src ./src
 RUN cmake -S . -B build && cmake --build build && mv ./build/inquisitor .
 
 CMD tail -f
-
-#CMD arptables -A INPUT --source-mac 02:42:ac:11:00:02 -j DROP; arptables -A INPUT --source-mac 02:42:ac:11:00:03 -j DROP; arptables -A INPUT --source-mac ff:ff:ff:ff:ff:ff -j DROP; tail -f

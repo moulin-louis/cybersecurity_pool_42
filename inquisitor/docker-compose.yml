@@ -8,14 +8,10 @@ services:
     build:
       context: .
       dockerfile: ./docker_file/Dockerfile.server
-    ports:
-      - "8787:21"
-    mac_address: 02:42:ac:11:00:02
-    cap_add:
-      - NET_ADMIN
+    mac_address: ${MAC_SERVER}
     networks:
       app_net:
-        ipv4_address: 172.16.238.10
+        ipv4_address: ${IP_SERVER}
 
   ftp_client:
     env_file: .env
@@ -24,12 +20,10 @@ services:
     build:
       context: .
       dockerfile: ./docker_file/Dockerfile.client
-    mac_address: 02:42:ac:11:00:03
-    cap_add:
-      - NET_ADMIN
+    mac_address: ${MAC_CLIENT}
     networks:
       app_net:
-        ipv4_address: 172.16.238.20
+        ipv4_address: ${IP_CLIENT}
 
   inquisitor:
     env_file: .env
@@ -39,8 +33,6 @@ services:
       context: .
       dockerfile: ./docker_file/Dockerfile.inquisitor
     mac_address: "02:42:ac:11:00:04"
-    cap_add:
-      - NET_ADMIN
     networks:
       app_net:
         ipv4_address: 172.16.238.30

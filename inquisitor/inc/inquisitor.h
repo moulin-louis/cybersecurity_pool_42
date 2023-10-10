@@ -1,9 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
 #include <unistd.h>
-#include <errno.h>
-#include <ctype.h>
+#include <cerrno>
+#include <cctype>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
@@ -13,13 +14,12 @@
 #include <net/ethernet.h>
 #include <linux/if_packet.h>
 #include <sys/time.h>
-#include <signal.h>
+#include <csignal>
 #define HW_TYPE_ETHERNET 0x0001 // 1
 #define LEN_HW_ETHERNET 6
 #define LEN_PROTO_IPV4 4
-#define FCS_LEN 4
 
-extern time_t init_time;
+using namespace std;
 
 typedef struct {
   int8_t *ip_src;
@@ -66,14 +66,7 @@ typedef struct addr_t addr_t;
 
 //void print_packet(const t_packet *packet);
 void mac_str_to_hex(int8_t *mac_addr, uint8_t *dest);
-void send_fake_arp_packet(t_inquisitor *inquisitor, uint32_t dest);
-void usage(void);
-time_t	gettime(void);
-void error(const char *func_error, const char *error_msg, const char *file, int line, const char *func_caller);
-void restore_arp_tables(t_inquisitor *inquisitor, uint32_t dest);
-
+void send_fake_arp_packet(t_inquisitor *inquisitor, uint32_t target);
+__attribute__((noreturn)) void error(const char *func_error, const char *error_msg, const char *file, int line, const char *func_caller);
+void restore_arp_tables(t_inquisitor *inquisitor, uint32_t target);
 __attribute__((unused)) void hexdump(void *data, size_t len, int32_t row);
-
-__attribute__((unused)) void decdump(void *data, size_t len, int32_t row);
-
-__attribute__((unused)) void asciidump(void *data, size_t len, int32_t row);
