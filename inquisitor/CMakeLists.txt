@@ -10,4 +10,7 @@ add_executable(
         inquisitor
         src/arp.cpp
         src/main.cpp
-        src/utils.cpp)
+        src/utils.cpp
+        src/packet.cpp)
+
+target_link_libraries(inquisitor pcap)

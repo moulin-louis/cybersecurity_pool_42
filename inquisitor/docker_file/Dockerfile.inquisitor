@@ -1,6 +1,6 @@
 FROM debian:latest
 
-RUN apt update && apt install -y build-essential fish cmake python3-scapy
+RUN apt update && apt install -y build-essential cmake python3-scapy libpcap-dev
 
 WORKDIR /inquisitor
 

