@@ -1,0 +1,15 @@
+version: '3.1'
+
+services:
+  sqli-lab:
+    container_name: "sqli-lab"
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8080:80"
+    networks:
+      app_net:
+
+networks:
+  app_net:
