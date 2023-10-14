@@ -1,13 +1,25 @@
 version: '3.1'
 
 services:
-  sqli-lab:
-    container_name: "sqli-lab"
+  web:
+    container_name: "web"
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: Dockerfile
+    depends_on:
+      - mariadb
     ports:
-      - "8080:80"
+      - "5000:5000"
+    networks:
+      app_net:
+  mariadb:
+    container_name: "mariadb"
+    build:
+      context: .
+      dockerfile: Dockerfile.mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: testdb
     networks:
       app_net:
 
