@@ -1,8 +1,8 @@
 # noinspection SqlNoDataSourceInspectionForFile
 
-CREATE DATABASE IF NOT EXISTS testdb;
+CREATE DATABASE IF NOT EXISTS prod;
 
-USE testdb;
+USE prod;
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,

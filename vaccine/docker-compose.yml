@@ -19,7 +19,7 @@ services:
       dockerfile: Dockerfile.mariadb
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: testdb
+      MYSQL_DATABASE: prod
     networks:
       app_net:
 

@@ -7,7 +7,7 @@ app = Flask(__name__)
 app.config['MYSQL_DATABASE_HOST'] = 'mariadb'
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = 'password'
-app.config['MYSQL_DATABASE_DB'] = 'testdb'
+app.config['MYSQL_DATABASE_DB'] = 'prod'
 app.config['DEBUG'] = True
 mysql = MySQL(app)
 
@@ -25,6 +25,7 @@ def index():
         except Exception as e:
             error = str(e)
     return render_template_string(open("main.html").read(), results=results, query=query, error=error)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
