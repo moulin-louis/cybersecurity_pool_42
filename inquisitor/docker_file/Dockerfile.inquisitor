@@ -7,7 +7,6 @@ WORKDIR /inquisitor
 COPY ../inc ./inc
 COPY ../CMakeLists.txt .
 COPY ../run.sh .
-COPY ../monitor.py .
 COPY ../src ./src
 RUN cmake -S . -B build && cmake --build build && mv ./build/inquisitor .
 
