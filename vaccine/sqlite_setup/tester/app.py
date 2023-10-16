@@ -1,15 +1,10 @@
 from flask import Flask, request, jsonify, render_template_string
-from flaskext.mysql import MySQL
+import sqlite3
+
 
 app = Flask(__name__)
 
-# Configure MySQL
-app.config['MYSQL_DATABASE_HOST'] = 'mariadb'
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'password'
-app.config['MYSQL_DATABASE_DB'] = 'prod'
-app.config['DEBUG'] = True
-mysql = MySQL(app)
+sqlite_db = sqlite3.connect('mydatabase.db', check_same_thread=False)
 
 
 @app.route('/', methods=['GET'])
@@ -17,7 +12,7 @@ def index():
     name = request.args.get('name')
     results = query = error = None
     if name:
-        cur = mysql.get_db().cursor()
+        cur = sqlite_db.cursor()
         query = f"SELECT * FROM users WHERE name = '{name}'"
         try:
             cur.execute(query)

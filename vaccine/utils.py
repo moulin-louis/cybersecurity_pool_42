@@ -33,7 +33,8 @@ def diff_html(html1, html2, result):
                 result.append(parsed_line)
 
 
-def write_result(archive_file, result):
+def write_result(archive_file, og_result):
+    result = og_result
     with open("result.txt", 'w') as f:
         for line in result:
             f.write(line + '\n')

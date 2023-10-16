@@ -1,8 +1,8 @@
-FROM python:3.8-slim
+FROM python:3.9-slim
 
 # Install required packages and MariaDB client
 RUN apt-get update \
-    && apt-get install -y mariadb-client libmariadb-dev \
+    && apt-get install -y mariadb-client libmariadb-dev sqlite3 \
     && apt-get clean
 
 # Set the working directory
@@ -12,10 +12,10 @@ WORKDIR /app
 COPY ./tester/requirements.txt .
 COPY ./tester/app.py .
 COPY ./tester/main.html .
-#RUN pip install -U Flask
-#RUN pip install -U Flask-MySQL
-RUN pip install --no-cache-dir -r requirements.txt
+COPY init.sql .
 
+RUN pip install --no-cache-dir -r requirements.txt
+RUN sqlite3 mydatabase.db < init.sql
 # Expose the application port
 EXPOSE 5000
 

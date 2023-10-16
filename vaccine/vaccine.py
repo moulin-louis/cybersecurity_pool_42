@@ -22,13 +22,13 @@ def detect_sql_injection(url, archive_file):
         check_vectors(vectors, base_url)
     elif method == "POST":
         vectors, base_url = find_potential_vector(url, method)
-        print('LOG: Found ' + str(len(vectors)) + ' potential vectors')
+        print('- LOG: Found ' + str(len(vectors)) + ' potential vectors')
         # perform_post(vector, base_url)
     else:
-        print('LOG: Wrong method, choose between GET and POST: ', method)
+        print('- LOG: Wrong method, choose between GET and POST: ', method)
         return
     if len(result) == 0:
-        print('LOG: Failed to extract any data')
+        print('- LOG: Failed to extract any data')
         return
     write_result(archive_file, result)
 

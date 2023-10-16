@@ -4,7 +4,6 @@ services:
   web:
     container_name: "web"
     build:
-      context: .
       dockerfile: Dockerfile
     depends_on:
       - mariadb
@@ -15,8 +14,7 @@ services:
   mariadb:
     container_name: "mariadb"
     build:
-      context: .
-      dockerfile: Dockerfile.mariadb
+      dockerfile: Dockerfile.mysql
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: prod

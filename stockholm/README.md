@@ -1,10 +1,15 @@
-# Inception Encryption Tool
+# Stockhom Encryption Tool
 
-**WARNING**: This tool is designed to encrypt files in a directory. Please use responsibly and **always ensure you have backups** before running encryption tools.
+**⚠️ WARNING: This project is for educational purposes only. Do not use for malicious intent. Always run in a safe environment like a virtual machine or Docker. The author is not responsible for any illegal use or data loss**
 
 ## Description
 
-The Inception Encryption Tool is a command-line program written in TypeScript that can encrypt or decrypt files in a specified directory (default is `$HOME/inception`). The tool targets specific file extensions, as defined in the source code.
+A demonstration of ransomware behavior similar to WannaCry, developed for the Linux platform. It encrypts files within a `infection` directory in the user's $HOME directory, and provides a decryption feature using the correct key.
+
+## Prerequisites
+
+- Bun
+- TypeScript
 
 ## Features
 
@@ -13,24 +18,18 @@ The Inception Encryption Tool is a command-line program written in TypeScript th
 - Supports various command-line flags for different functionalities.
 
 ## Usage
+### To run the program
+ - bun build --compile ./index.ts --outfile=stockholm
+ - ./stockholm [OPTIONS]
 
-```bash
-# To run the program
-$ bun build --compile ./index.ts --outfile=stockholm
-$ ./stockholm [OPTIONS]
-```
-
-### Options
+## Options
 
 - `-v`, `--version`: Display the version of the program.
 - `-h`, `--help`: Display help information.
 - `-s`, `--silent`: Run the program without producing any output.
 - `-r`, `--reverse [KEY]`: Decrypt files. This requires the correct decryption key.
 
-## Warning
-
-Be extremely careful when running this tool, especially in production environments. Always ensure that you have backups of important files. The tool will encrypt targeted files, making them inaccessible without the decryption key.
-
-## Disclaimer
-
-This tool is provided for educational purposes. The author is not responsible for any misuse or data loss. Always review and test code before running it in a critical environment.
+## Important Notes
+- Only files within the infection folder in the user's HOME directory will be affected.
+- Files will be renamed with a .ft extension after encryption.
+- Ensure to keep the encryption key safe for decryption

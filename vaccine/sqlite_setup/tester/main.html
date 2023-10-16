@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Injection Test</title>
+</head>
+<body>
+    <h1>Search Users</h1>
+    <form action="/" method="get">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name">
+        <input type="submit" value="Search">
+    </form>
+
+    <div id="results">
+        {% if results %}
+            <h2>Results</h2>
+            <ul>
+                {% for result in results %}
+                    <li>ID: {{ result[0] }}, Name: {{ result[1] }}, Email: {{ result[2] }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+<!--    <div id="query">-->
+<!--        {% if query %}-->
+<!--            Executed SQL Query: <br>{{ query }}-->
+<!--        {% endif %}-->
+<!--    </div>-->
+
+    <div id="error">
+        {% if error %}
+            Database Error: <br>{{ error }}
+        {% endif %}
+    </div>
+</body>
+</html>
