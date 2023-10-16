@@ -21,6 +21,7 @@
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 #include <sys/wait.h>
+#include <regex>
 #define HW_TYPE_ETHERNET 0x0001 // 1
 #define LEN_HW_ETHERNET 6
 #define LEN_PROTO_IPV4 4

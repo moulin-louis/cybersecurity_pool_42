@@ -1,6 +1,6 @@
 FROM debian:latest
 
-RUN apt update && apt install -y build-essential cmake python3-scapy libpcap-dev
+RUN apt update && apt install -y build-essential cmake libpcap-dev
 
 WORKDIR /inquisitor
 

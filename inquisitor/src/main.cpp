@@ -40,6 +40,27 @@ int main(int ac, char **av) {
     verbose = true;
     av[5] = nullptr;
   }
+  if (!regex_match(av[1], regex("([0-9]{1,3}\\.){3}[0-9]{1,3}")))
+	{
+		cout << "Invalid IP address for IP-src" << endl;
+		return (1);
+	}
+	if (!regex_match(av[2], regex("([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})")))
+	{
+		cout << "Invalid MAC address for MAC-src" << endl;
+		return (1);
+	}
+	if (!regex_match(av[3], regex("([0-9]{1,3}\\.){3}[0-9]{1,3}")))
+	{
+		cout << "Invalid IP address for IP-target" << endl;
+		return (1);
+	}
+	if (!regex_match(av[4], regex("([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})")))
+	{
+		cout << "Invalid MAC address for MAC-target" << endl;
+		return (1);
+	}
+
   signal(SIGINT, handler_sigint);
   init_inqui(&inquisitor, av);
   std::thread spoofer(capture_packet, &inquisitor);

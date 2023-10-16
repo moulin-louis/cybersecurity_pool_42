@@ -2,7 +2,7 @@
 
 __attribute__ ((noreturn)) void error(const char *func_error, const char *error_msg, const char *file, int line, const char *func_caller) {
   char errno_tmp = errno;
-  dprintf(2, RED "ERROR: %s error: %s, caller: %s, file: %s, line: %d" RESET, func_error,
+  dprintf(2, RED "ERROR: %s error: %s, caller: %s, file: %s, line: %d\n" RESET, func_error,
           error_msg ? error_msg : strerror(errno), func_caller, file, line);
   exit(errno_tmp);
 }
