@@ -6,4 +6,6 @@ RUN mkdir -p /var/ftp && mkdir -p /var/run/vsftpd/empty
 
 COPY vsftpd.conf /etc/vsftpd/
 
+# CMD tail -f
+
 CMD ["vsftpd", "/etc/vsftpd.conf"]

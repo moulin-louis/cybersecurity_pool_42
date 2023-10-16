@@ -1,14 +1,14 @@
-#!/usr/bin/fish
+#!/bin/bash
 
-if set -q argv[1]
-    if test "$argv[1]" = "-v"
+if [[ -n $1 ]]; then
+    if [[ $1 == "-v" ]]; then
         echo 'Running in verbose mode'
         ./inquisitor "$IP_SERVER" "$MAC_SERVER" "$IP_CLIENT" "$MAC_CLIENT" -v
     else
         echo "Wrong option"
         exit 1
-    end
+    fi
 else
     echo 'Running in non verbose mode'
     ./inquisitor "$IP_SERVER" "$MAC_SERVER" "$IP_CLIENT" "$MAC_CLIENT"
-end
+fi
