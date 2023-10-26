@@ -1,5 +1,5 @@
 # Cybersecurity 42 project
-## Modules:
+## Modules: (Language, Note)
 - arachnida (Python, 100/100)
 - ft_otp (Rust, 100/100)
 - ft_onion (Dockerfile, 100/100)
